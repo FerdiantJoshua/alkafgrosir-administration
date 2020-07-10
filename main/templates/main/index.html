@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %} Alkaf Administration {% endblock %}
+{% block content %}
+<div class="container">
+  <div class="jumbotron">
+    <h1>Welcome to Alkaf Administration !</h1>
+    {% if user.is_authenticated %}
+        <h2>Hello {{ user.first_name }} {{ user.last_name }}</h2>
+    {% else %}
+        <h2>Register or Login if you'd like to</h2>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

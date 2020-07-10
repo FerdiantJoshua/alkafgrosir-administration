@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load base_extras %}
+{% load static %}
+{% block title %} Alkaf Administration {% endblock %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/transaction/jquery.datetimepicker.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Add New Transaction</h1>
+  <form method="post" action="{% url 'transaction:index' %}">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label class="form-control-label">{{ field.label }}</label>
+      {% if field.errors %}
+      {{ field|add_placeholder|set_class:'form-control is-invalid' }}
+      <div class="invalid-feedback">{{ field.errors }}</div>
+      {% else %}
+      {{ field|add_placeholder|set_class:'form-control' }}
+      {% endif %}
+      {% if field.help_text %}
+      <small class="form-text text-muted">{{ field.help_text }}</small>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <h4>Purchases:</h4>
+    {{ purchase_formset.management_form }}
+    {% for form in purchase_formset %}
+    <div class="form-group">
+      <b>{{ forloop.counter }}.</b>
+      {% for field in form.visible_fields %}
+        {% if field.label != 'Delete' %}
+          <div class="form-group">
+            <label class="form-control-label">{{ field.label }}</label>
+            {% if field.errors %}
+              {{ field|add_placeholder|set_class:'form-control is-invalid' }}
+              <div class="invalid-feedback">{{ field.errors }}</div>
+            {% else %}
+              {{ field|add_placeholder|set_class:'form-control' }}
+            {% endif %}
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="form-check">
+            {{ field|add_placeholder|set_class:'form-check-input' }}
+            <label class="form-check-label">{{ field.label }}</label>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit"class="btn btn-primary" value="Add Transaction">Add Transaction</button>
+    <button type="Reset"class="btn btn-secondary" value="Reset">Reset</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<!--<script src="{% static 'js/learning/jquery.js' %}"></script>-->
+<script src="{% static 'js/transaction/jquery.datetimepicker.full.min.js' %}"></script>
+<script src="{% static 'js/transaction/datetimepicker.js' %}"></script>
+{% endblock %}

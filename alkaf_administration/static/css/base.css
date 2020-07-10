@@ -1,0 +1,12 @@
+html, body, main {
+    margin: 0;
+    height: 100%;
+}
+
+.yellow {
+    color: yellow;
+}
+
+.black {
+    color: black;
+}
