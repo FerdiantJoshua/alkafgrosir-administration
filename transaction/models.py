@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class City(models.Model):
@@ -46,6 +47,9 @@ class ProductVariation(models.Model):
 class Marketplace(models.Model):
     name = models.CharField('Marketplace Name', max_length=24, unique=True)
     short_name = models.CharField('Short Name', max_length=5, unique=True)
+
+    def get_absolute_url(self):
+        return reverse('management:manage_marketplace', args=[self.pk])
 
     def __str__(self):
         return f'{self.short_name} ({self.name})'

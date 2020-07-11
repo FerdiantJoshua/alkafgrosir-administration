@@ -1,0 +1,62 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Marketplace {% endblock %}
+{% block management_content %}
+<div class="container">
+  <div class="row">
+    <h1>Marketplace</h1>
+  </div>
+  <div class="row">
+    <form method="post" action="{% url 'management:manage_marketplace' marketplace.id %}">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label class="form-control-label">{{ field.label }}</label>
+        {% if field.errors %}
+        {{ field|add_placeholder|set_class:'form-control is-invalid' }}
+        <div class="invalid-feedback">{{ field.errors }}</div>
+        {% else %}
+        {{ field|add_placeholder|set_class:'form-control' }}
+        {% endif %}
+        {% if field.help_text %}
+        <small class="form-text text-muted">{{ field.help_text }}</small>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit"class="btn btn-primary" value="Update marketplace">Update marketplace</button>
+      <input type="reset" class="btn btn-secondary" value="Reset">
+      <a class="btn btn-secondary" href="{% url 'management:list_marketplace' %}">
+        Back
+      </a>
+      <br>
+      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
+        Delete marketplace
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Are you sure to delete this marketplace?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        You cannot undo this action.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I change my mind</button>
+        <form method="post" action="{% url 'management:delete_marketplace' marketplace.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Yes, delete it</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

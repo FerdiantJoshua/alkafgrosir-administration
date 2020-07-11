@@ -1,0 +1,61 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% block dashboard_content %}
+<div class="container">
+  <h1>{% if not user.is_superuser or not user.is_staff %}Your{% endif %} Bookings</h1>
+  <h2>Pending</h2>
+  <div class="row">
+    <ul>
+      {% for booking in pending_bookings %}
+        <li><a href="{{ booking.get_absolute_url }}">{{ booking }}</a></li>
+      {% empty %}
+        <li>No recorded pending bookings.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <h2>Expired</h2>
+  <div class="row">
+    <ul>
+      {% for booking in expired_bookings %}
+        <li><a href="{{ booking.get_absolute_url }}">{{ booking }}</a></li>
+      {% empty %}
+        <li>No recorded expired bookings.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <h2>Accepted</h2>
+  <div class="row">
+    <ul>
+      {% for booking in accepted_bookings %}
+        <li><a href="{{ booking.get_absolute_url }}">{{ booking }}</a></li>
+      {% empty %}
+        <li>No recorded accepted bookings.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <h2>Rejected</h2>
+  <div class="row">
+    <ul>
+      {% for booking in rejected_bookings %}
+        <li><a href="{{ booking.get_absolute_url }}">{{ booking }}</a></li>
+      {% empty %}
+        <li>No recorded rejected bookings.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <h2>Cancelled</h2>
+  <div class="row">
+    <ul>
+      {% for booking in cancelled_bookings %}
+        <li><a href="{{ booking.get_absolute_url }}">{{ booking }}</a></li>
+      {% empty %}
+        <li>No recorded rejected bookings.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

@@ -44,7 +44,7 @@
         </ul>
         <ul class="navbar-nav">
           {% if user.is_authenticated %}
-          <li><a class="nav-link" href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+          <li><a class="nav-link" href="{% url 'management:main' %}"><i class="fas fa-tachometer-alt"></i> Management</a></li>
           <li><a class="nav-link" href="#"><i class="fas fa-user"></i> {{ user.first_name }} {{ user.last_name }} </a></li>
           <li><a class="nav-link" href="{% url 'account:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
           {% else %}

@@ -1,0 +1,29 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Add Marketplace {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Add New Marketplace</h1>
+  <form method="post" action="{% url 'management:create_marketplace' %}">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label class="form-control-label">{{ field.label }}</label>
+      {% if field.errors %}
+      {{ field|add_placeholder|set_class:'form-control is-invalid' }}
+      <div class="invalid-feedback">{{ field.errors }}</div>
+      {% else %}
+      {{ field|add_placeholder|set_class:'form-control' }}
+      {% endif %}
+      {% if field.help_text %}
+      <small class="form-text text-muted">{{ field.help_text }}</small>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit"class="btn btn-primary" value="Add Marketplace">Add Marketplace</button>
+    <a class="btn btn-secondary" href="{% url 'management:list_marketplace' %}">
+      Back
+    </a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Marketplace {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Marketplace</h1>
+  <div class="row">
+    <ul>
+      {% for marketplace in marketplaces %}
+        <li><a href="{{ marketplace.get_absolute_url }}">{{ marketplace }}</a></li>
+      {% empty %}
+        <li>No recorded marketplaces.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'management:create_marketplace' %}">
+      Add marketplace
+    </a>
+  </div>
+</div>
+{% endblock %}
