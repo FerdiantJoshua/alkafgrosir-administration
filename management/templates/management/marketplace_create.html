@@ -6,20 +6,7 @@
   <h1>Add New Marketplace</h1>
   <form method="post" action="{% url 'management:create_marketplace' %}">
     {% csrf_token %}
-    {% for field in form %}
-    <div class="form-group">
-      <label class="form-control-label">{{ field.label }}</label>
-      {% if field.errors %}
-      {{ field|add_placeholder|set_class:'form-control is-invalid' }}
-      <div class="invalid-feedback">{{ field.errors }}</div>
-      {% else %}
-      {{ field|add_placeholder|set_class:'form-control' }}
-      {% endif %}
-      {% if field.help_text %}
-      <small class="form-text text-muted">{{ field.help_text }}</small>
-      {% endif %}
-    </div>
-    {% endfor %}
+    {% include 'basic_form.html' %}
     <button type="submit"class="btn btn-primary" value="Add Marketplace">Add Marketplace</button>
     <a class="btn btn-secondary" href="{% url 'management:list_marketplace' %}">
       Back

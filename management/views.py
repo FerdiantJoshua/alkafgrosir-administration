@@ -23,9 +23,9 @@ class MarketplaceListView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'marketplaces'
 
 
-class MarketplaceView(LoginRequiredMixin, generic.FormView, generic.DetailView):
+class MarketplaceEditView(LoginRequiredMixin, generic.FormView, generic.DetailView):
     model = Marketplace
-    template_name = 'management/marketplace_view.html'
+    template_name = 'management/marketplace_edit.html'
     form_class = MarketplaceForm
     success_url = reverse_lazy('management:list_marketplace')
 
@@ -46,5 +46,5 @@ class MarketplaceView(LoginRequiredMixin, generic.FormView, generic.DetailView):
 
 class MarketplaceDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Marketplace
-    template_name = 'management/lesson_view.html'
+    template_name = 'management/marketplace_edit.html'
     success_url = reverse_lazy('management:list_marketplace')
