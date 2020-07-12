@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load base_extras %}
+{% load static %}
+{% block title %} Transactions {% endblock %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/transaction/jquery.datetimepicker.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>Transactions</h1>
+
+  <div class="row mt-4">
+    <h4>Search</h4>
+  </div>
+  <form class="form" method="get">
+    <div class="form-group">
+      <div class="form-row">
+        <div class="col">
+          <input id="date_search" name="date" class="form-control" placeholder="Date" value="{{ search_init_data.course }}">
+        </div>
+
+        <div class="col">
+          <input name="customer" class="form-control" placeholder="Customer" value="{{ search_init_data.teacher }}">
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" value="Search">Search</button>
+    <input type="reset" class="btn btn-secondary" value="Clear">
+  </form>
+
+  <div class="d-flex justify-content-end">
+    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.object_list.count }} results
+  </div>
+
+  <div class="row">
+    <div class="table-responsive-xl">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">#</th>
+            <th scope="col">Marketplace</th>
+            <th scope="col">Customer</th>
+            <th scope="col">City</th>
+            <th scope="col">Purchases</th>
+            <th scope="col">Courier</th>
+            <th scope="col">Is Prepared</th>
+            <th scope="col">Is Packed</th>
+            <th scope="col">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+          <tr>
+            <th>{{ transaction.date }}</th>
+            <th>{{ transaction.number }}</th>
+            <td>{{ transaction.marketplace }}</td>
+            <td>{{ transaction.customer }}</td>
+            <td>{{ transaction.city }}</td>
+            <td>{{ transaction.purchase_set.all|get_purchase_queryset_str_repr|linebreaksbr }}</td>
+            <td>{{ transaction.courier }}</td>
+            <td>{{ transaction.is_prepared }}</td>
+            <td>{{ transaction.is_packed }}</td>
+            <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
+          </tr>
+          {% empty %}
+          <tr>
+            {% for field in fields %}
+            <td>No data</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end">
+      {{ page_obj }}
+  </div>
+
+  <!-- PAGINATOR -->
+  <div class="row">
+    <nav aria-label="Transaction Pagination">
+      <ul class="pagination">
+        {% for page in page_obj.paginator.page_range %}
+          {% ifequal page current_page %}
+          <li class="page-item active" aria-current="page">
+            <span class="page-link"> {{ page }}
+              <span class="sr-only">(current)</span>
+            </span>
+          </li>
+          {% else %}
+          <li class="page-item">
+            <a class="page-link" href="{{ request_params }}&page={{ page }}">{{ page }}</a>
+          </li>
+          {% endifequal %}
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'transaction:create_transaction' %}">
+      Add Transaction
+    </a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<!--<script src="{% static 'js/learning/jquery.js' %}"></script>-->
+<script src="{% static 'js/transaction/jquery.datetimepicker.full.min.js' %}"></script>
+<script src="{% static 'js/transaction/datetimepicker.js' %}"></script>
+{% endblock %}
