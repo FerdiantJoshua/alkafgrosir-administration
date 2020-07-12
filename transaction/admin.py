@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import City, Customer, Color, Product, ProductVariation, Marketplace, Courier, Transaction, Purchase
+from .models import City, Customer, Product, Marketplace, Courier, Transaction, Purchase
 
 
 class PurchasesInLine(admin.StackedInline):
@@ -14,9 +14,7 @@ class TransactionAdmin(admin.ModelAdmin):
 
 admin.site.register(City)
 admin.site.register(Customer)
-admin.site.register(Color)
 admin.site.register(Product)
-admin.site.register(ProductVariation)
 admin.site.register(Marketplace)
 admin.site.register(Courier)
 admin.site.register(Transaction, TransactionAdmin)
