@@ -3,11 +3,16 @@ $(document).ready(function() {
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
     var yyyy = today.getFullYear();
-    today = yyyy + '/' + mm + '/' + dd
+    today = dd + '/' + mm + '/' + yyyy
 
     jQuery('#id_date').datetimepicker({
         timepicker: false,
-        format: 'Y/m/d',
+        format: 'd-m-Y',
         value: today,
+    });
+
+    jQuery('#date_search').datetimepicker({
+        timepicker: false,
+        format: 'd-m-Y'
     });
 })
