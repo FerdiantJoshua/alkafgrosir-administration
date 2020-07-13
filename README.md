@@ -57,13 +57,28 @@ Built using [Django](https://github.com/django/django) 3.0.8.
     DB_HOST = 127.0.0.1
     DB_PORT = 3306
     DEV_MODE = False
+    SECRET_KEY = {your_secret_key}
     ```
-7. Migrate the database
+   
+7. Create your own secret key
+    ```shell script
+    python manage.py shell
+    ```
+    You will run a Django shell, then run this script inside the Django shell:
+    ```python
+    from django.core.management.utils import get_random_secret_key
+    print(get_random_secret_key())
+    exit()
+    ```
+   
+8. Put the printed secret key in SECRET_KEY variable in .env
+   
+9. Migrate the database
     ```bash
     $ python manage.py migrate
     ```
 
-8. Run the server
+10. Run the server
     ```bash
     $ python manage.py runserver 0.0.0.0:8000
     ```
