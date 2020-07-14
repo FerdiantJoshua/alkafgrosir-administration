@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %} Login {% endblock %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/account/signin.css' %}">
+{% endblock %}
 {% block content %}
-<div class="container">
+<div class="container text-center">
   <h1>Login</h1>
-  <form method="post" action="{% url 'account:login' %}">
+  <form class="form-signin" method="post" action="{% url 'account:login' %}">
     {% csrf_token %}
     <div class="form-group">
       {{ form.username }}
@@ -14,7 +18,7 @@
       <div class="invalid-feedback">{{ form.non_field_errors }}</div>
       {% endif %}
     </div>
-    <button type="submit" class="btn btn-primary">Login</button>
+    <button type="submit" class="btn btn-primary btn-block">Login</button>
   </form>
 </div>
 {% endblock %}
