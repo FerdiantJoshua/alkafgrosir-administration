@@ -28,18 +28,18 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
-      <a class="navbar-brand" href="{% url 'main:index' %}"><i class="fas fa-home"></i> Alkaf Administration</a>
+      <a class="navbar-brand" href="{% url 'main:index' %}"><i class="fas fa-home mr-1"></i>Alkaf Administration</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="mr-auto navbar-nav">
-          {% if user.is_superuser %}
-          <li><a class="nav-link" href="{% url 'admin:index' %}"><i class="fas fa-tools"></i> Admin</a></li>
+          {% if user.is_staff %}
+          <li><a class="nav-link" href="{% url 'admin:index' %}"><i class="fas fa-tools mr-1"></i>Admin</a></li>
           {% endif %}
           {% if user.is_authenticated %}
-          <li><a class="nav-link" href="{% url 'transaction:list_transaction' %}"><i class="far fa-clipboard"></i> Transaction</a></li>
+          <li><a class="nav-link" href="{% url 'transaction:list_transaction' %}"><i class="far fa-clipboard mr-1"></i>Transaction</a></li>
           {% endif %}
         </ul>
         <ul class="navbar-nav">

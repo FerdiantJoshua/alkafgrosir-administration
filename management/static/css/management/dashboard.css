@@ -67,18 +67,30 @@ body {
  */
 
 [role="main"] {
-  padding-top: 133px; /* Space for fixed navbar */
+  padding-top: 24px; /* Space for fixed navbar */
 }
 
 @media (min-width: 768px) {
   [role="main"] {
-    padding-top: 48px; /* Space for fixed navbar */
+    padding-top: 36px; /* Space for fixed navbar */
   }
 }
 
 /*
  * Navbar
  */
+
+@media (max-width: 768px) {
+    .sidebar-sticky{font-size: 12px;}
+}
+
+@media (max-width: 576px) {
+    .sidebar-sticky{font-size: 18px;}
+}
+
+@media (max-width: 280px) {
+    .sidebar-sticky{font-size: 12px;}
+}
 
 .navbar-brand {
   padding-top: .75rem;

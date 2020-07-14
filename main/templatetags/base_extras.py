@@ -22,11 +22,11 @@ def add_placeholder(form_field):
 
 
 @register.filter()
-def print_purchase_querysets(value, arg):
+def render_purchase_querysets(value, arg):
     if not isinstance(value, QuerySet) or value.model is not Purchase:
-        raise ValueError(_('The print_purchase_querysets filter only accept Purchase QuerySet!'))
+        raise ValueError(_('The render_purchase_querysets filter only accept Purchase QuerySet!'))
     elif len(arg.split(',')) != 2:
-        raise ValueError(_('The print_purchase_querysets filter accepts 2 arguments separated by comma!'))
+        raise ValueError(_('The render_purchase_querysets filter accepts 2 arguments separated by comma!'))
     # print(f'Value: {value}. Arg: {arg}')
     button_class, data_target_id = arg.split(',')
 

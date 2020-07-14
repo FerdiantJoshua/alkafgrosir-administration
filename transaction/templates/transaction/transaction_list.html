@@ -7,7 +7,9 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-  <h1>Transactions</h1>
+  <div class="row">
+    <h1>Transactions</h1>
+  </div>
 
   <div class="row mt-4">
     <h4>Search</h4>
@@ -42,45 +44,47 @@
   </div>
 
   <div class="row">
-    <div class="table-responsive-xl">
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Date</th>
-            <th scope="col">#</th>
-            <th scope="col">Marketplace</th>
-            <th scope="col">Customer</th>
-            <th scope="col">City</th>
-            <th scope="col">Purchases</th>
-            <th scope="col">Courier</th>
-            <th scope="col">Is Prepared</th>
-            <th scope="col">Is Packed</th>
-            <th scope="col">Edit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for transaction in transactions %}
-          <tr>
-            <th id="transaction_date_{{ forloop.counter }}">{{ transaction.date }}</th>
-            <th id="transaction_number_{{ forloop.counter }}">{{ transaction.number }}</th>
-            <td>{{ transaction.marketplace }}</td>
-            <td id="transaction_customer_{{ forloop.counter }}">{{ transaction.customer }}</td>
-            <td>{{ transaction.city }}</td>
-            <td id="transaction_purchase_{{ forloop.counter }}">
-              {{ transaction.purchase_set.all|print_purchase_querysets:'purchase-detail-button,purchaseDetailModal'|safe }}
-            </td>
-            <td>{{ transaction.courier }}</td>
-            <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
-            <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
-            <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td>No data</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="col">
+      <div class="table-responsive-xl">
+        <table class="table table-striped table-sm">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">#</th>
+              <th scope="col">Marketplace</th>
+              <th scope="col">Customer</th>
+              <th scope="col">City</th>
+              <th scope="col">Purchases</th>
+              <th scope="col">Courier</th>
+              <th scope="col">Is Prepared</th>
+              <th scope="col">Is Packed</th>
+              <th scope="col">Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions %}
+            <tr>
+              <th id="transaction_date_{{ forloop.counter }}">{{ transaction.date }}</th>
+              <th id="transaction_number_{{ forloop.counter }}">{{ transaction.number }}</th>
+              <td>{{ transaction.marketplace }}</td>
+              <td id="transaction_customer_{{ forloop.counter }}">{{ transaction.customer }}</td>
+              <td>{{ transaction.city }}</td>
+              <td id="transaction_purchase_{{ forloop.counter }}">
+                {{ transaction.purchase_set.all|render_purchase_querysets:'purchase-detail-button,purchaseDetailModal'|safe }}
+              </td>
+              <td>{{ transaction.courier }}</td>
+              <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
+              <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
+              <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td>No data</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -109,7 +113,7 @@
     </nav>
   </div>
 
-  <div class="row">
+  <div class="row mb-4">
     <a class="btn btn-primary" href="{% url 'transaction:create_transaction' %}">
       Add Transaction
     </a>

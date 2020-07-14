@@ -7,82 +7,46 @@
 {% block content %}
 <div class="container-fluid">
   <div class="row">
-    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+    <nav class="col-2 d-md-block bg-light sidebar">
       <div class="sidebar-sticky">
         <ul class="nav flex-column">
-          <li class="nav-item">
+          <li class="nav-item mx-auto m-sm-0">
             <a class="nav-link {% if '/main/' in request.path %}active{% endif %}" href="{% url 'management:main' %}">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                   class="feather feather-home">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-              Dashboard {% if '/main/' in request.path %}<span class="sr-only">(current)</span>{% endif %}
+              <i class="fas fa-tachometer-alt fa-fw mr-1"></i>
+              <span class="d-sm-inline d-none">Dashboard {% if '/main/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {% if '_marketplace/' in request.path %}active{% endif %}" href="{% url 'management:list_marketplace' %}">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                   class="feather feather-file">
-                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                <polyline points="13 2 13 9 20 9"></polyline>
-              </svg>
-              Marketplace {% if '_marketplace/' in request.path %}<span class="sr-only">(current)</span>{% endif %}
+          <li class="nav-item mx-auto m-sm-0">
+            <a class="nav-link {% if '/marketplace/' in request.path %}active{% endif %}" href="{% url 'management:list_marketplace' %}">
+              <i class="fas fa-shopping-cart fa-fw mr-1"></i>
+              <span class="d-sm-inline d-none">Marketplace {% if '/marketplace/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {% if '_customer/' in request.path %}active{% endif %}" href="#">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                   class="feather feather-users">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-              Customer {% if '_customer/' in request.path %}<span class="sr-only">(current)</span>{% endif %}
+          <li class="nav-item mx-auto m-sm-0">
+            <a class="nav-link {% if '/customer/' in request.path %}active{% endif %}" href="#">
+              <i class="fas fa-users fa-fw mr-1"></i>
+              <span class="d-sm-inline d-none">Customer {% if '/customer/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
             </a>
           </li>
-<!--          <li class="nav-item">-->
-<!--            <a class="nav-link disabled" href="#">-->
-<!--              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"-->
-<!--                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"-->
-<!--                   class="feather feather-shopping-cart">-->
-<!--                <circle cx="9" cy="21" r="1"></circle>-->
-<!--                <circle cx="20" cy="21" r="1"></circle>-->
-<!--                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>-->
-<!--              </svg>-->
-<!--              </svg>-->
-<!--              <i>Customers</i>-->
-<!--            </a>-->
-<!--          </li>-->
-<!--          <li class="nav-item">-->
-<!--            <a class="nav-link disabled" href="#">-->
-<!--              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"-->
-<!--                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"-->
-<!--                   class="feather feather-bar-chart-2">-->
-<!--                <line x1="18" y1="20" x2="18" y2="10"></line>-->
-<!--                <line x1="12" y1="20" x2="12" y2="4"></line>-->
-<!--                <line x1="6" y1="20" x2="6" y2="14"></line>-->
-<!--              </svg>-->
-<!--              <i>Reports</i>-->
-<!--            </a>-->
-<!--          </li>-->
-<!--          <li class="nav-item">-->
-<!--            <a class="nav-link disabled" href="#">-->
-<!--              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"-->
-<!--                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"-->
-<!--                   class="feather feather-layers">-->
-<!--                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>-->
-<!--                <polyline points="2 17 12 22 22 17"></polyline>-->
-<!--                <polyline points="2 12 12 17 22 12"></polyline>-->
-<!--              </svg>-->
-<!--              <i>Integrations</i>-->
-<!--            </a>-->
-<!--          </li>-->
-<!--        </ul>-->
+          <li class="nav-item mx-auto m-sm-0">
+            <a class="nav-link {% if '/city/' in request.path %}active{% endif %}" href="{% url 'management:list_city' %}">
+              <i class="fas fa-building fa-fw mr-1"></i>
+              <span class="d-sm-inline d-none">City {% if '/city/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
+            </a>
+          </li>
+          <li class="nav-item mx-auto m-sm-0">
+            <a class="nav-link disabled" href="#">
+              <i class="fas fa-truck fa-fw mr-1"></i>
+              <span class="d-sm-inline d-none">Courier {% if '/courier/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
+            </a>
+          </li>
+          <li class="nav-item mx-auto m-sm-0">
+            <a class="nav-link disabled" href="#">
+              <i class="fas fa-cubes fa-fw mr-1"></i>
+              <span class="d-sm-inline d-none">Product {% if '/product/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
+            </a>
+          </li>
+        </ul>
 
 <!--        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">-->
 <!--          <span>Saved reports</span>-->
@@ -153,11 +117,11 @@
 <!--              <i>Year-end sale</i>-->
 <!--            </a>-->
 <!--          </li>-->
-        </ul>
+<!--        </ul>-->
       </div>
     </nav>
 
-    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <main role="main" class="col-10 ml-auto col-lg-10 px-4">
       {% block management_content %}
       {% endblock %}
     </main>
