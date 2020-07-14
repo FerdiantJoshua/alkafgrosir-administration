@@ -38,16 +38,12 @@
   </form>
 </div>
 
-<div id="available_product" class="d-none">
-  {{ available_product }}
-</div>
-<div id="available_city" class="d-none">
-  {{ available_city }}
-</div>
+{{ available_product|json_script:"available_product" }}
+{{ available_city|json_script:"available_city" }}
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'js/transaction/jquery.datetimepicker.full.min.js' %}"></script>
 <script src="{% static 'js/transaction/datetimepicker.js' %}"></script>
-<script src="{% static 'js/transaction/transaction_purchase_management.js' %}"></script>
+<script src="{% static 'js/transaction/transaction_purchase_form.js' %}"></script>
 <script src="{% static 'js/transaction/jquery-ui.js' %}"></script>
 {% endblock %}

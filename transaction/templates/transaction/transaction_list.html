@@ -13,19 +13,28 @@
     <h4>Search</h4>
   </div>
   <form class="form" method="get">
-    <div class="form-group">
-      <div class="form-row">
-        <div class="col">
-          <input id="date_search" name="date" class="form-control" placeholder="Date" value="{{ search_init_data.course }}">
-        </div>
-
-        <div class="col">
-          <input name="customer" class="form-control" placeholder="Customer" value="{{ search_init_data.teacher }}">
+    {% for field in form_search %}
+      {% cycle 'left' 'right' as form_position silent %}
+      {% if form_position == 'left' %}
+      <div class="form-group">
+        <div class="form-row">
+          <div class="col">
+            {{ field|add_placeholder|set_class:'form-control' }}
+          </div>
+        {% if forloop.last %}
         </div>
       </div>
-    </div>
+        {% endif %}
+      {% else %}
+          <div class="col">
+            {{ field|add_placeholder|set_class:'form-control' }}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
     <button type="submit" class="btn btn-primary" value="Search">Search</button>
-    <input type="reset" class="btn btn-secondary" value="Clear">
+    <input type="reset" class="btn btn-secondary" value="Reset">
   </form>
 
   <div class="d-flex justify-content-end">
@@ -52,22 +61,22 @@
         <tbody>
           {% for transaction in transactions %}
           <tr>
-            <th>{{ transaction.date }}</th>
-            <th>{{ transaction.number }}</th>
+            <th id="transaction_date_{{ forloop.counter }}">{{ transaction.date }}</th>
+            <th id="transaction_number_{{ forloop.counter }}">{{ transaction.number }}</th>
             <td>{{ transaction.marketplace }}</td>
-            <td>{{ transaction.customer }}</td>
+            <td id="transaction_customer_{{ forloop.counter }}">{{ transaction.customer }}</td>
             <td>{{ transaction.city }}</td>
-            <td>{{ transaction.purchase_set.all|get_purchase_queryset_str_repr|linebreaksbr }}</td>
+            <td id="transaction_purchase_{{ forloop.counter }}">
+              {{ transaction.purchase_set.all|print_purchase_querysets:'purchase-detail-button,purchaseDetailModal'|safe }}
+            </td>
             <td>{{ transaction.courier }}</td>
-            <td>{{ transaction.is_prepared }}</td>
-            <td>{{ transaction.is_packed }}</td>
+            <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
+            <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
             <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
           </tr>
           {% empty %}
           <tr>
-            {% for field in fields %}
             <td>No data</td>
-            {% endfor %}
           </tr>
           {% endfor %}
         </tbody>
@@ -106,9 +115,30 @@
     </a>
   </div>
 </div>
+
+<!-- Purchase Details Modal -->
+<div class="modal fade" id="purchaseDetailModal" tabindex="-1" role="dialog" aria-labelledby="purchaseDetailModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="purchaseDetailModalTitle">Purchases</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="purchaseDetailModalBody">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block scripts %}
 <!--<script src="{% static 'js/learning/jquery.js' %}"></script>-->
 <script src="{% static 'js/transaction/jquery.datetimepicker.full.min.js' %}"></script>
 <script src="{% static 'js/transaction/datetimepicker.js' %}"></script>
+<script src="{% static 'js/transaction/transaction_list.js' %}"></script>
 {% endblock %}

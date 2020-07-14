@@ -1,7 +1,7 @@
 function setTextAutocomplete(availableObjects, textInputIdArray, setHelpText) {
   textInputIdArray.map((id) => {
     $('#' + id).autocomplete({
-      minLength: 2,
+      minLength: 0,
       source: availableObjects,
       select: function( event, ui ) {
         $('#' + id).val(ui.item.value)
@@ -19,7 +19,7 @@ function initializeInputFieldAndManagementFormset(newPurchaseForm, formsetManage
   inputFields = newPurchaseForm.find('input')
   inputFields.each((k) => {
     inputFields[k].id = inputFields[k].id.replace(0, n-1)
-    inputFields[k].name = inputFields[k].id.replace(0, n-1)
+    inputFields[k].name = inputFields[k].id.replace(0, n-1).replace('id_', '')
     inputFields[k].value = ''
 //    console.log(inputFields[k].id)
   })
@@ -28,27 +28,27 @@ function initializeInputFieldAndManagementFormset(newPurchaseForm, formsetManage
 }
 
 $(document).ready(function() {
-  const availableProducts = JSON.parse($('#available_product').html().trim())
-  const availableCities = JSON.parse($('#available_city').html().trim())
-  console.log(availableProducts)
-  console.log(availableCities)
+  const availableProducts = JSON.parse($('#available_product').text())
+  const availableCities = JSON.parse($('#available_city').text())
 
-  const productTextInputRegex = new RegExp('id_purchase_set-[0-9]+-product', 'g')
-  const productTextInputs = $('#purchases').html().match(productTextInputRegex)
-  console.log(productTextInputs)
   const cityTextInputs = ['id_city']
   console.log(cityTextInputs)
-  setTextAutocomplete(availableProducts, productTextInputs, true)
   setTextAutocomplete(availableCities, cityTextInputs, false)
 
-  var n = 1
-  const purchaseForm = $('.purchase-formset')
+  const productTextInputRegex = new RegExp('id_purchase_set-[0-9]+-product', 'g')
+  var productTextInputs = $('#purchases').html().match(productTextInputRegex)
+  console.log(productTextInputs)
+  setTextAutocomplete(availableProducts, productTextInputs, true)
+
+  var n = $('.purchase-formset').length
+  const purchaseForm = $('.purchase-formset').first()
   const formsetManagement = $('#management-form')
 
   $('#add-purchase-button').on('mousedown', () => {
     n++
     newPurchaseForm = purchaseForm.clone().appendTo(purchaseForm.parent())
     initializeInputFieldAndManagementFormset(newPurchaseForm, formsetManagement, n)
+    productTextInputs = $('#purchases').html().match(productTextInputRegex)
     setTextAutocomplete(availableProducts, productTextInputs, true)
   })
 })

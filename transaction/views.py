@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max
@@ -7,7 +8,8 @@ from django.db.models.base import ModelBase
 from django.urls import reverse_lazy
 from django.views import generic
 
-from .forms import TransactionForm, PurchaseFormSet
+from alkaf_administration.settings import DATETIME_FORMAT
+from .forms import TransactionForm, PurchaseFormSet, TransactionSearchForm
 from .models import Transaction, Product, City
 
 
@@ -18,12 +20,39 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'transactions'
     ordering = 'date'
 
+    def _retrieve_default_get_params(self):
+        params = dict(self.request.GET)
+        for key in params:
+            params[key] = params[key][0]
+        today_date = datetime.today()
+        params['date_start'] = datetime.strptime(params['date_start'], DATETIME_FORMAT) if params.get('date_start')\
+            else today_date
+        params['date_end'] = datetime.strptime(params['date_end'], DATETIME_FORMAT) if params.get('date_end')\
+            else today_date
+        return params
+
+    def get_queryset(self):
+        params = self._retrieve_default_get_params()
+        transactions = Transaction.objects.filter(
+            date__gte=params['date_start'],
+            date__lte=params['date_end'],
+            marketplace__name__icontains=params.get('marketplace', ''),
+            customer__name__icontains=params.get('customer', ''),
+            city__name__icontains=params.get('city', ''),
+            purchase__product__name__icontains=params.get('purchase', ''),
+            courier__name__icontains=params.get('courier', ''),
+        ).distinct()
+
+        return transactions
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
-        fields = self.object_list.first()._meta.fields
+        if 'form_search' not in kwargs:
+            context['form_search'] = TransactionSearchForm(initial=self._retrieve_default_get_params())
+
         current_page = self.request.GET.get(self.page_kwarg) or 1
         request_params = re.sub(r'&page=[0-9]*', '', self.request.get_full_path().split('/')[-1])
-        context['fields'] = fields
+
         context['current_page'] = int(current_page)
         context['request_params'] = '?' + request_params if '?' not in request_params else request_params
         return context
@@ -37,6 +66,7 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
     template_name = 'transaction/transaction_create.html'
     form_class = TransactionForm
     success_url = reverse_lazy('transaction:list_transaction')
+    initial = {'date': datetime.today()}
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -52,13 +82,12 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
             context['formset'] = PurchaseFormSet(self.request.POST)
         else:
             context['formset'] = PurchaseFormSet()
-        context['available_product'] = json.dumps(_get_list_of_available_record(Product))
-        context['available_city'] = json.dumps(_get_list_of_available_record(City))
+        context['available_product'] = _get_list_of_available_record(Product)
+        context['available_city'] = _get_list_of_available_record(City)
         return context
 
     def form_valid(self, form):
         prev_number = Transaction.objects.filter(date=form.instance.date).aggregate(Max('number'))['number__max']
-        print(prev_number)
         form.instance.number = prev_number + 1 if prev_number else 1
         self.object = form.save()
         self.purchase_formset.instance = self.object
@@ -87,9 +116,8 @@ class TransactionEditView(LoginRequiredMixin, generic.FormView, generic.DetailVi
             context['formset'] = PurchaseFormSet(self.request.POST, instance=self.object)
         else:
             context['formset'] = PurchaseFormSet(instance=self.object)
-        print(context['formset'])
-        context['available_product'] = json.dumps(_get_list_of_available_record(Product))
-        context['available_city'] = json.dumps(_get_list_of_available_record(City))
+        context['available_product'] = _get_list_of_available_record(Product)
+        context['available_city'] = _get_list_of_available_record(City)
         return context
 
     def get_form_kwargs(self):

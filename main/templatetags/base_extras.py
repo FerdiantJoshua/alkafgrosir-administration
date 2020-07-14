@@ -22,11 +22,29 @@ def add_placeholder(form_field):
 
 
 @register.filter()
-def get_purchase_queryset_str_repr(value):
+def print_purchase_querysets(value, arg):
     if not isinstance(value, QuerySet) or value.model is not Purchase:
-        raise ValueError(_(f'The get_purchase_queryset_str_repr filter only accept Purchase QuerySet!'))
-    print(value)
+        raise ValueError(_('The print_purchase_querysets filter only accept Purchase QuerySet!'))
+    elif len(arg.split(',')) != 2:
+        raise ValueError(_('The print_purchase_querysets filter accepts 2 arguments separated by comma!'))
+    # print(f'Value: {value}. Arg: {arg}')
+    button_class, data_target_id = arg.split(',')
+
     purchases = []
     for purchase in value:
         purchases.append(f'{purchase.product.name} ({purchase.product.color}) = {purchase.amount}')
-    return ',\n'.join(purchases)
+
+    if len(value) > 2:
+        purchases = list(map(lambda x: f'<li>{x}</li>', purchases))
+        output = f'''
+            <div class="d-none">
+                <h6 class="font-weight-bold">{len(value)} products:</h6>
+                <ol>{''.join(purchases)}</ol>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm {button_class}" data-toggle="modal" data-target="#{data_target_id}">
+                {len(value)} products
+            </button>
+        '''
+    else:
+        output = f'{"<br>".join(purchases)}'
+    return output
