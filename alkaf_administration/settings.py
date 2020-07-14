@@ -148,6 +148,7 @@ DATETIME_FORMAT = '%d-%m-%Y'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'alkaf_administration/static'),
     os.path.join(BASE_DIR, 'transaction/static'),
+    os.path.join(BASE_DIR, 'account/static'),
 ]
 
 STATIC_URL = '/static/'
