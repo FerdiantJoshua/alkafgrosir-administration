@@ -1,0 +1,22 @@
+{% extends 'basic_form.html' %}
+{% load base_extras %}
+{% block non_checkbox_field %}
+{% with field.name|add:'-autocompleter' as autocompleter_class %}
+  {% if field.errors  %}
+    {% if field.field.widget.attrs.class == 'has-autocomplete' %}
+      {{ field|add_placeholder|duplicate_for_autocompleter:autocompleter_class|append_class:'form-control is-invalid' }}
+      {{ field|append_class:'d-none' }}
+    {% else %}
+      {{ field|add_placeholder|append_class:'form-control is-invalid' }}
+    {% endif %}
+    <div class="invalid-feedback">{{ field.errors }}</div>
+  {% else %}
+    {% if field.field.widget.attrs.class == 'has-autocomplete' %}
+      {{ field|add_placeholder|duplicate_for_autocompleter:autocompleter_class|append_class:'form-control' }}
+      {{ field|append_class:'d-none' }}
+    {% else %}
+      {{ field|add_placeholder|append_class:'form-control' }}
+    {% endif %}
+  {% endif %}
+{% endwith %}
+{% endblock %}

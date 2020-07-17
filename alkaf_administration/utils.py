@@ -13,3 +13,14 @@ def add_invalid_css_class_to_form(func):
             field.widget.attrs.update({'class': field.widget.attrs['class'] + ' is-invalid'})
         return func(*args, **kwargs)
     return wrapper
+
+
+def set_field_html_name(cls, new_name):
+    """
+    This creates wrapper around the normal widget rendering,
+    allowing for a custom field name (new_name).
+    """
+    old_render = cls.widget.render
+    def _widget_render_wrapper(name, value, attrs=None, renderer=None):
+        return old_render(new_name, value, attrs, renderer)
+    cls.widget.render = _widget_render_wrapper

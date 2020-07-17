@@ -3,7 +3,8 @@
 {% load static %}
 {% block title %} Transactions {% endblock %}
 {% block links %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/transaction/jquery.datetimepicker.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/transaction/bootstrap-datepicker.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/transaction/floating-labels.css' %}">
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -18,19 +19,18 @@
     {% for field in form_search %}
       {% cycle 'left' 'right' as form_position silent %}
       {% if form_position == 'left' %}
-      <div class="form-group">
         <div class="form-row">
-          <div class="col">
-            {{ field|add_placeholder|set_class:'form-control' }}
+          <div class="form-label-group col-sm-6">
+            {{ field|add_placeholder|append_class:'form-control' }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
           </div>
         {% if forloop.last %}
         </div>
-      </div>
         {% endif %}
       {% else %}
-          <div class="col">
-            {{ field|add_placeholder|set_class:'form-control' }}
-          </div>
+        <div class="form-label-group col-sm-6">
+          {{ field|add_placeholder|append_class:'form-control' }}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
         </div>
       </div>
       {% endif %}
@@ -58,6 +58,7 @@
               <th scope="col">Courier</th>
               <th scope="col">Is Prepared</th>
               <th scope="col">Is Packed</th>
+              <th scope="col">Packager</th>
               <th scope="col">Edit</th>
             </tr>
           </thead>
@@ -75,11 +76,14 @@
               <td>{{ transaction.courier }}</td>
               <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
               <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
+              <td>{{ transaction.packager }}</td>
               <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
             </tr>
             {% empty %}
             <tr>
+              {% for i in 11|times %}
               <td>No data</td>
+              {% endfor %}
             </tr>
             {% endfor %}
           </tbody>
@@ -89,7 +93,7 @@
   </div>
 
   <div class="d-flex justify-content-end">
-      {{ page_obj }}
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
   </div>
 
   <!-- PAGINATOR -->
@@ -97,7 +101,7 @@
     <nav aria-label="Transaction Pagination">
       <ul class="pagination">
         {% for page in page_obj.paginator.page_range %}
-          {% ifequal page current_page %}
+          {% ifequal page page_obj.number %}
           <li class="page-item active" aria-current="page">
             <span class="page-link"> {{ page }}
               <span class="sr-only">(current)</span>
@@ -122,7 +126,7 @@
 
 <!-- Purchase Details Modal -->
 <div class="modal fade" id="purchaseDetailModal" tabindex="-1" role="dialog" aria-labelledby="purchaseDetailModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="purchaseDetailModalTitle">Purchases</h5>
@@ -141,8 +145,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<!--<script src="{% static 'js/learning/jquery.js' %}"></script>-->
-<script src="{% static 'js/transaction/jquery.datetimepicker.full.min.js' %}"></script>
+<script src="{% static 'js/transaction/bootstrap-datepicker.min.js' %}"></script>
 <script src="{% static 'js/transaction/datetimepicker.js' %}"></script>
 <script src="{% static 'js/transaction/transaction_list.js' %}"></script>
 {% endblock %}

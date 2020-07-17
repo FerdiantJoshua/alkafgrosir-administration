@@ -1,4 +1,3 @@
-import json
 import re
 from datetime import datetime
 
@@ -10,11 +9,11 @@ from django.views import generic
 
 from alkaf_administration.settings import DATETIME_FORMAT
 from .forms import TransactionForm, PurchaseFormSet, TransactionSearchForm
-from .models import Transaction, Product, City
+from .models import Transaction, Product, City, Customer
 
 
 class TransactionListView(LoginRequiredMixin, generic.ListView):
-    paginate_by = 3
+    paginate_by = 50
     model = Transaction
     template_name = 'transaction/transaction_list.html'
     context_object_name = 'transactions'
@@ -33,27 +32,14 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         params = self._retrieve_default_get_params()
-        transactions = Transaction.objects.filter(
-            date__gte=params['date_start'],
-            date__lte=params['date_end'],
-            marketplace__name__icontains=params.get('marketplace', ''),
-            customer__name__icontains=params.get('customer', ''),
-            city__name__icontains=params.get('city', ''),
-            purchase__product__name__icontains=params.get('purchase', ''),
-            courier__name__icontains=params.get('courier', ''),
-        ).distinct()
-
-        return transactions
+        return Transaction.objects.search_by_criteria(params)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
         if 'form_search' not in kwargs:
             context['form_search'] = TransactionSearchForm(initial=self._retrieve_default_get_params())
 
-        current_page = self.request.GET.get(self.page_kwarg) or 1
         request_params = re.sub(r'&page=[0-9]*', '', self.request.get_full_path().split('/')[-1])
-
-        context['current_page'] = int(current_page)
         context['request_params'] = '?' + request_params if '?' not in request_params else request_params
         return context
 
@@ -66,7 +52,11 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
     template_name = 'transaction/transaction_create.html'
     form_class = TransactionForm
     success_url = reverse_lazy('transaction:list_transaction')
-    initial = {'date': datetime.today()}
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({'date': datetime.today(), 'packager': self.request.user})
+        return initial
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -79,11 +69,13 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['formset'] = PurchaseFormSet(self.request.POST)
+            context['formset'] = PurchaseFormSet(self.request.POST, instance=kwargs.get('instance'))
         else:
-            context['formset'] = PurchaseFormSet()
-        context['available_product'] = _get_list_of_available_record(Product)
+            context['formset'] = PurchaseFormSet(instance=kwargs.get('instance'))
         context['available_city'] = _get_list_of_available_record(City)
+        context['available_customer'] = _get_list_of_available_record(Customer)
+        context['available_product'] = _get_list_of_available_record(Product)
+        context['attribute_helptext_urls'] = context['form']._meta.model.get_absolute_attribute_helptext_urls()
         return context
 
     def form_valid(self, form):
@@ -95,7 +87,7 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
         return super().form_valid(form)
 
 
-class TransactionEditView(LoginRequiredMixin, generic.FormView, generic.DetailView):
+class TransactionEditView(TransactionCreateView, generic.DetailView):
     model = Transaction
     template_name = 'transaction/transaction_edit.html'
     form_class = TransactionForm
@@ -103,22 +95,10 @@ class TransactionEditView(LoginRequiredMixin, generic.FormView, generic.DetailVi
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form = self.get_form()
-        self.purchase_formset = self.get_context_data()['formset']
-        if form.is_valid() and self.purchase_formset.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = PurchaseFormSet(self.request.POST, instance=self.object)
-        else:
-            context['formset'] = PurchaseFormSet(instance=self.object)
-        context['available_product'] = _get_list_of_available_record(Product)
-        context['available_city'] = _get_list_of_available_record(City)
-        return context
+        return super().get_context_data(instance=self.object, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -130,7 +110,7 @@ class TransactionEditView(LoginRequiredMixin, generic.FormView, generic.DetailVi
         self.purchase_formset.instance = self.object
         form.save()
         self.purchase_formset.save()
-        return super().form_valid(form)
+        return generic.FormView.form_valid(self, form)
 
 
 class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):

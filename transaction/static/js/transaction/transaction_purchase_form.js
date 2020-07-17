@@ -1,21 +1,55 @@
-function setTextAutocomplete(availableObjects, textInputIdArray, setHelpText) {
-  textInputIdArray.map((id) => {
-    $('#' + id).autocomplete({
+function overrideHelpTextLinksTarget(class_name) {
+  $(class_name).each((idx, helptextUrl) => {
+    windows = {}
+    helptextUrl = $(helptextUrl)
+    helptextUrl.click((e) => {
+      e.preventDefault()
+      url = helptextUrl.attr('href')
+      windows[helptextUrl.attr('id')] = window.open(url, '_blank', 'resizable=0,menubar=0,width=500,height=600')
+    })
+  })
+}
+
+function adjustAutocompleteFieldText(availableObjects, textInputs) {
+  textInputs.each((idx, textInput) => {
+    textInput = $(textInput)
+    let label = ''
+    const value = parseInt(textInput.val())
+    if (value) {
+      for (let i = 0; i < availableObjects.length; i++) {
+        if (availableObjects[i]['value'] == value) {
+          label = availableObjects[i]['label']
+          break
+        }
+      };
+      textInput.val(label);
+    }
+  })
+}
+
+function addAutocompleter(availableObjects, textInputs) {
+  textInputs.each((idx, textInput) => {
+    textInput = $(textInput)
+    textInput.autocomplete({
       minLength: 0,
       source: availableObjects,
+      focus: function( event, ui ) {
+        return false;
+      },
       select: function( event, ui ) {
-        $('#' + id).val(ui.item.value)
-        if (setHelpText) {$('#' + id).next().html(ui.item.label)}
+        textInput.val(ui.item.label)
+        textInput.next().val(ui.item.value)
         return false;
       }
+    }).focus(function(){
+        $(this).autocomplete('search', $(this).val());
     });
   })
 }
 
-function initializeInputFieldAndManagementFormset(newPurchaseForm, formsetManagement, n) {
+function initializeInputField(newPurchaseForm, n) {
 //  console.log(newPurchaseForm)
   newPurchaseForm.find('b').first().html(n + '.')
-  newPurchaseForm.find('small').first().html('')
   inputFields = newPurchaseForm.find('input')
   inputFields.each((k) => {
     inputFields[k].id = inputFields[k].id.replace(0, n-1)
@@ -23,32 +57,50 @@ function initializeInputFieldAndManagementFormset(newPurchaseForm, formsetManage
     inputFields[k].value = ''
 //    console.log(inputFields[k].id)
   })
-//  console.log(formsetManagement)
-  formsetManagement.find('input').first().val(n)
 }
 
 $(document).ready(function() {
-  const availableProducts = JSON.parse($('#available_product').text())
+  overrideHelpTextLinksTarget('.helptext-urls')
+
   const availableCities = JSON.parse($('#available_city').text())
+  const availableCustomers = JSON.parse($('#available_customer').text())
+  const availableProducts = JSON.parse($('#available_product').text())
 
-  const cityTextInputs = ['id_city']
-  console.log(cityTextInputs)
-  setTextAutocomplete(availableCities, cityTextInputs, false)
+// SET CITY AUTOCOMPLETE
+  const cityTextInputs = $('.city-autocompleter')
+  const customerTextInputs = $('.customer-autocompleter')
+  let productTextInputs = $('.product-autocompleter')
+  addAutocompleter(availableCustomers, customerTextInputs)
+  addAutocompleter(availableCities, cityTextInputs)
+  addAutocompleter(availableProducts, productTextInputs)
+  adjustAutocompleteFieldText(availableCustomers, customerTextInputs)
+  adjustAutocompleteFieldText(availableCities, cityTextInputs)
+  adjustAutocompleteFieldText(availableProducts, productTextInputs)
 
-  const productTextInputRegex = new RegExp('id_purchase_set-[0-9]+-product', 'g')
-  var productTextInputs = $('#purchases').html().match(productTextInputRegex)
-  console.log(productTextInputs)
-  setTextAutocomplete(availableProducts, productTextInputs, true)
-
-  var n = $('.purchase-formset').length
+// ADD-AND-REMOVE PURCHASE_BUTTON FUNCTIONALITY
+  let n = $('.purchase-formset').length
+  const initialN = n
   const purchaseForm = $('.purchase-formset').first()
   const formsetManagement = $('#management-form')
-
-  $('#add-purchase-button').on('mousedown', () => {
+  $('#add-purchase-button').on('click', (e) => {
+    e.preventDefault()
     n++
-    newPurchaseForm = purchaseForm.clone().appendTo(purchaseForm.parent())
-    initializeInputFieldAndManagementFormset(newPurchaseForm, formsetManagement, n)
-    productTextInputs = $('#purchases').html().match(productTextInputRegex)
-    setTextAutocomplete(availableProducts, productTextInputs, true)
+    let newPurchaseForm = purchaseForm.clone().appendTo(purchaseForm.parent())
+    initializeInputField(newPurchaseForm, n)
+    formsetManagement.find('input').first().val(n)
+    productTextInputs = $('.product-autocompleter')
+    addAutocompleter(availableProducts, productTextInputs, true)
+    $([document.documentElement, document.body]).animate({
+        scrollTop: newPurchaseForm.offset().top
+    }, 300);
+  })
+  $('#remove-purchase-button').on('click', (e) => {
+    e.preventDefault()
+    if (n > initialN) {
+      n--
+      let lastPurchaseForm = $('.purchase-formset').last()
+      lastPurchaseForm.remove()
+      formsetManagement.find('input').first().val(n)
+    }
   })
 })

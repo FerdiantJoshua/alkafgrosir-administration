@@ -1,25 +1,39 @@
 {% load base_extras %}
-{% for field in form.visible_fields %}
-  {% if field.field.widget.input_type != 'checkbox' %}
-    <div class="form-group">
-      <label class="form-control-label">{{ field.label }}</label>
+<div class="form-row">
+  {% for field in form.visible_fields %}
+    {% if field.field.widget.input_type != 'checkbox' %}
+    <div class="form-group {{ form_group_col_class|default:'col-12' }}">
+      {% if not no_label %}<label class="form-control-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
+      {% block non_checkbox_field %}
       {% if field.errors  %}
-        {{ field|add_placeholder|set_class:'form-control is-invalid' }}
+        {{ field|add_placeholder|append_class:'form-control is-invalid' }}
         <div class="invalid-feedback">{{ field.errors }}</div>
       {% else %}
-        {{ field|add_placeholder|set_class:'form-control' }}
+        {{ field|add_placeholder|append_class:'form-control' }}
       {% endif %}
+      {% endblock %}
       {% if field.help_text %}
-        <small class="form-text text-muted">{{ field.help_text }}</small>
+        {% with field.name as key %}
+        {% if attribute_helptext_urls and attribute_helptext_urls|dict_key:key %}
+          <small class="form-text text-muted">
+            <a id="helptext-urls-{{ field.name }}" class="helptext-urls" target="_blank" href="{{ attribute_helptext_urls|dict_key:key }}">{{ field.help_text }}</a>
+          </small>
+        {% else %}
+          <small class="form-text text-muted">{{ field.help_text }}</small>
+        {% endif %}
+        {% endwith %}
       {% endif %}
     </div>
-  {% else %}
-    <div class="form-check">
-      {{ field|add_placeholder|set_class:'form-check-input' }}
-      <label class="form-check-label">{{ field.label }}</label>
+    {% else %}
+    <div class="form-group col-12">
+      <div class="form-check">
+        {{ field|add_placeholder|append_class:'form-check-input' }}
+        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      </div>
     </div>
-  {% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
+</div>
 {% for field in form.hidden_fields %}
   {{ field }}
 {% endfor %}
