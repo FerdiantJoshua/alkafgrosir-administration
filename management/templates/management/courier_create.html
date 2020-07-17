@@ -1,0 +1,16 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Add Courier {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Add New Courier</h1>
+  <form method="post" action="{% url 'management:create_courier' %}">
+    {% csrf_token %}
+    {% include 'basic_form.html' %}
+    <button type="submit"class="btn btn-primary" value="Add Courier">Add Courier</button>
+    <a class="btn btn-secondary" href="{% url 'management:list_courier' %}">
+      Back
+    </a>
+  </form>
+</div>
+{% endblock %}

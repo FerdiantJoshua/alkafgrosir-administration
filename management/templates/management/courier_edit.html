@@ -1,23 +1,23 @@
 {% extends 'management/base.html' %}
 {% load base_extras %}
-{% block title %} Marketplace {% endblock %}
+{% block title %} Courier {% endblock %}
 {% block management_content %}
 <div class="container">
   <div class="row">
-    <h1>Marketplace</h1>
+    <h1>Courier</h1>
   </div>
   <div class="row">
-    <form method="post" action="{% url 'management:edit_marketplace' marketplace.id %}">
+    <form method="post" action="{% url 'management:edit_courier' courier.id %}">
       {% csrf_token %}
       {% include 'basic_form.html' %}
-      <button type="submit"class="btn btn-primary" value="Update marketplace">Update marketplace</button>
+      <button type="submit"class="btn btn-primary" value="Update courier">Update courier</button>
       <input type="reset" class="btn btn-secondary" value="Reset">
-      <a class="btn btn-secondary" href="{% url 'management:list_marketplace' %}">
+      <a class="btn btn-secondary" href="{% url 'management:list_courier' %}">
         Back
       </a>
       <br>
       <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirmationModal">
-        Delete marketplace
+        Delete courier
       </button>
     </form>
   </div>
@@ -28,7 +28,7 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="deleteConfirmationModalLabel">Are you sure to delete this marketplace?</h5>
+        <h5 class="modal-title" id="deleteConfirmationModalLabel">Are you sure to delete this courier?</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -38,7 +38,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I change my mind</button>
-        <form method="post" action="{% url 'management:delete_marketplace' marketplace.id %}">
+        <form method="post" action="{% url 'management:delete_courier' courier.id %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-danger">Yes, delete it</button>
         </form>

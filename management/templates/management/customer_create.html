@@ -1,0 +1,16 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Add Customer {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Add New Customer</h1>
+  <form method="post" action="{% url 'management:create_customer' %}">
+    {% csrf_token %}
+    {% include 'basic_form.html' %}
+    <button type="submit"class="btn btn-primary" value="Add Customer">Add Customer</button>
+    <a class="btn btn-secondary" href="{% url 'management:list_customer' %}">
+      Back
+    </a>
+  </form>
+</div>
+{% endblock %}

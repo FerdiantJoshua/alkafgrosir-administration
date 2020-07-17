@@ -23,7 +23,7 @@
             </a>
           </li>
           <li class="nav-item mx-auto m-sm-0">
-            <a class="nav-link {% if '/customer/' in request.path %}active{% endif %}" href="#">
+            <a class="nav-link {% if '/customer/' in request.path %}active{% endif %}" href="{% url 'management:list_customer' %}">
               <i class="fas fa-users fa-fw mr-1"></i>
               <span class="d-sm-inline d-none">Customer {% if '/customer/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
             </a>
@@ -35,13 +35,13 @@
             </a>
           </li>
           <li class="nav-item mx-auto m-sm-0">
-            <a class="nav-link disabled" href="#">
+            <a class="nav-link {% if '/courier/' in request.path %}active{% endif %}" href="{% url 'management:list_courier' %}">
               <i class="fas fa-truck fa-fw mr-1"></i>
               <span class="d-sm-inline d-none">Courier {% if '/courier/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
             </a>
           </li>
           <li class="nav-item mx-auto m-sm-0">
-            <a class="nav-link disabled" href="#">
+            <a class="nav-link {% if '/product/' in request.path %}active{% endif %}" href="{% url 'management:list_product' %}">
               <i class="fas fa-cubes fa-fw mr-1"></i>
               <span class="d-sm-inline d-none">Product {% if '/product/' in request.path %}<span class="sr-only">(current)</span>{% endif %}</span>
             </a>
@@ -127,4 +127,7 @@
     </main>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/management/management.js' %}"></script>
 {% endblock %}

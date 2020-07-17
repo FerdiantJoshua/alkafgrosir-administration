@@ -1,0 +1,16 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Add City {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Add New City</h1>
+  <form method="post" action="{% url 'management:create_city' %}">
+    {% csrf_token %}
+    {% include 'basic_form.html' %}
+    <button type="submit"class="btn btn-primary" value="Add City">Add City</button>
+    <a class="btn btn-secondary" href="{% url 'management:list_city' %}">
+      Back
+    </a>
+  </form>
+</div>
+{% endblock %}

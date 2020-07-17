@@ -1,0 +1,22 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Courier {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Courier</h1>
+  <div class="row">
+    <ul>
+      {% for courier in couriers %}
+        <li><a href="{{ courier.get_absolute_url }}">{{ courier }}</a></li>
+      {% empty %}
+        <li>No recorded couriers.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'management:create_courier' %}">
+      Add courier
+    </a>
+  </div>
+</div>
+{% endblock %}

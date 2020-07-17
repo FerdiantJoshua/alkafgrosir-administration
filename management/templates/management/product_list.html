@@ -1,0 +1,22 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Product {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Product</h1>
+  <div class="row">
+    <ul>
+      {% for product in products %}
+        <li><a href="{{ product.get_absolute_url }}">{{ product }}</a></li>
+      {% empty %}
+        <li>No recorded products.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'management:create_product' %}">
+      Add product
+    </a>
+  </div>
+</div>
+{% endblock %}

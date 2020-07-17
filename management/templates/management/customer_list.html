@@ -1,0 +1,22 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} Customer {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>Customer</h1>
+  <div class="row">
+    <ul>
+      {% for customer in customers %}
+        <li><a href="{{ customer.get_absolute_url }}">{{ customer }}</a></li>
+      {% empty %}
+        <li>No recorded customers.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'management:create_customer' %}">
+      Add customer
+    </a>
+  </div>
+</div>
+{% endblock %}

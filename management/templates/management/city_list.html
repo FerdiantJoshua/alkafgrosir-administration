@@ -1,0 +1,22 @@
+{% extends 'management/base.html' %}
+{% load base_extras %}
+{% block title %} City {% endblock %}
+{% block management_content %}
+<div class="container">
+  <h1>City</h1>
+  <div class="row">
+    <ul>
+      {% for city in cities %}
+        <li><a href="{{ city.get_absolute_url }}">{{ city }}</a></li>
+      {% empty %}
+        <li>No recorded cities.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="row">
+    <a class="btn btn-primary" href="{% url 'management:create_city' %}">
+      Add city
+    </a>
+  </div>
+</div>
+{% endblock %}
