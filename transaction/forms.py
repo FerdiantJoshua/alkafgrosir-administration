@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import Select
 from django.utils.translation import gettext as _
 
@@ -32,6 +33,17 @@ class PurchaseForm(forms.ModelForm):
         super(PurchaseForm, self).__init__(*args, **kwargs)
         self.fields['amount'].initial = ''
 
+    def clean(self):
+        self.cleaned_data = super().clean()
+        print(self.cleaned_data)
+        previous_amount = 0
+        if self.instance:
+            print('purchase amount while cleaning:', self.instance.amount)
+            previous_amount = self.instance.amount
+        if self.cleaned_data['amount'] - previous_amount > self.cleaned_data['product'].stock:
+            error_msg = 'The amount of this product purchase is greater than the remaining stock!'
+            raise ValidationError({'amount': error_msg})
+        return self.cleaned_data
 
     class Meta():
         model = Purchase
@@ -76,10 +88,11 @@ class TransactionSearchForm(forms.Form):
                                  widget=forms.DateInput(format=DATETIME_FORMAT))
     date_end = forms.DateField(required=False, input_formats=[DATETIME_FORMAT],
                                widget=forms.DateInput(format=DATETIME_FORMAT))
-    is_prepared = forms.NullBooleanField(label='', required=False, widget=CustomNullBooleanSelect(choices=IS_PREPARED_CHOICES))
-    is_packed = forms.NullBooleanField(label='', required=False, widget=CustomNullBooleanSelect(choices=IS_PACKED_CHOICES))
     marketplace = forms.CharField(required=False)
     customer = forms.CharField(required=False)
     city = forms.CharField(required=False)
     purchases = forms.CharField(required=False)
     courier = forms.CharField(required=False)
+    packager = forms.CharField(required=False, help_text='Type \'None\' for no packager')
+    is_prepared = forms.NullBooleanField(label='', required=False, widget=CustomNullBooleanSelect(choices=IS_PREPARED_CHOICES))
+    is_packed = forms.NullBooleanField(label='', required=False, widget=CustomNullBooleanSelect(choices=IS_PACKED_CHOICES))

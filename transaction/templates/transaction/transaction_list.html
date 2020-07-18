@@ -12,32 +12,11 @@
     <h1>Transactions</h1>
   </div>
 
-  <div class="row mt-4">
-    <h4>Search</h4>
+  <div class="row my-4">
+    <a class="btn btn-block btn-lg btn-primary" href="{% url 'transaction:create_transaction' %}">
+      <b>Add Transaction</b>
+    </a>
   </div>
-  <form class="form" method="get">
-    {% for field in form_search %}
-      {% cycle 'left' 'right' as form_position silent %}
-      {% if form_position == 'left' %}
-        <div class="form-row">
-          <div class="form-label-group col-sm-6">
-            {{ field|add_placeholder|append_class:'form-control' }}
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-          </div>
-        {% if forloop.last %}
-        </div>
-        {% endif %}
-      {% else %}
-        <div class="form-label-group col-sm-6">
-          {{ field|add_placeholder|append_class:'form-control' }}
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        </div>
-      </div>
-      {% endif %}
-    {% endfor %}
-    <button type="submit" class="btn btn-primary" value="Search">Search</button>
-    <input type="reset" class="btn btn-secondary" value="Reset">
-  </form>
 
   <div class="d-flex justify-content-end">
     Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.object_list.count }} results
@@ -117,11 +96,24 @@
     </nav>
   </div>
 
-  <div class="row mb-4">
-    <a class="btn btn-primary" href="{% url 'transaction:create_transaction' %}">
-      Add Transaction
-    </a>
+  <div class="row mt-b">
+    <h4>Search</h4>
   </div>
+  <form class="form" method="get">
+    <div class="form-row">
+    {% for field in form_search %}
+      <div class="form-label-group col-sm-6">
+        {{ field|add_placeholder|append_class:'form-control' }}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.help_text %}
+          <small class="form-text text-muted">{{ field.help_text }}</small>
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary" value="Search">Search</button>
+    <input type="reset" class="btn btn-secondary" value="Reset">
+  </form>
 </div>
 
 <!-- Purchase Details Modal -->

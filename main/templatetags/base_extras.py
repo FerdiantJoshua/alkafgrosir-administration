@@ -80,7 +80,7 @@ def render_purchase_querysets(value, arg):
                 <h6 class="font-weight-bold">{len(value)} products:</h6>
                 <ol>{''.join(purchases)}</ol>
             </div>
-            <button type="button" class="btn btn-primary btn-sm {button_class}" data-toggle="modal" data-target="#{data_target_id}">
+            <button type="button" class="btn btn-secondary btn-sm {button_class}" data-toggle="modal" data-target="#{data_target_id}">
                 {len(value)} products
             </button>
         """

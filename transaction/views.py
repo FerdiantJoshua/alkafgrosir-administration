@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max
 from django.db.models.base import ModelBase
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views import generic
 
@@ -69,9 +70,9 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['formset'] = PurchaseFormSet(self.request.POST, instance=kwargs.get('instance'))
+            context['formset'] = PurchaseFormSet(self.request.POST, instance=kwargs.get('formset_instance'))
         else:
-            context['formset'] = PurchaseFormSet(instance=kwargs.get('instance'))
+            context['formset'] = PurchaseFormSet(instance=kwargs.get('formset_instance'))
         context['available_city'] = _get_list_of_available_record(City)
         context['available_customer'] = _get_list_of_available_record(Customer)
         context['available_product'] = _get_list_of_available_record(Product)
@@ -81,8 +82,11 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
     def form_valid(self, form):
         prev_number = Transaction.objects.filter(date=form.instance.date).aggregate(Max('number'))['number__max']
         form.instance.number = prev_number + 1 if prev_number else 1
-        self.object = form.save()
-        self.purchase_formset.instance = self.object
+        self.purchase_formset.instance = form.instance
+        for purchase_form in self.purchase_formset:
+            purchase_form.instance.product.stock -= purchase_form.instance.amount
+            purchase_form.instance.product.save()
+        form.save()
         self.purchase_formset.save()
         return super().form_valid(form)
 
@@ -95,10 +99,14 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+        self.previous_amounts = []
+        for purchase_form in self.get_context_data()['formset']:
+            self.previous_amounts.append(purchase_form.instance.amount)
+        print('initial value:', self.previous_amounts)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(instance=self.object, **kwargs)
+        return super().get_context_data(formset_instance=self.object, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -108,6 +116,16 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
     def form_valid(self, form):
         form.instance.id = self.object.id
         self.purchase_formset.instance = self.object
+        for i in range(len(self.purchase_formset)):
+            purchase_form = self.purchase_formset[i]
+            print('purchase amount after validation:', purchase_form.instance.amount)
+            print('purchase amount after validation, changed_data:', purchase_form.changed_data)
+            if 'amount' in purchase_form.changed_data:
+                purchase_form.instance.product.stock -= purchase_form.instance.amount - self.previous_amounts[i]
+                purchase_form.instance.product.save()
+            elif 'DELETE' in purchase_form.changed_data:
+                purchase_form.instance.product.stock += self.previous_amounts[i]
+                purchase_form.instance.product.save()
         form.save()
         self.purchase_formset.save()
         return generic.FormView.form_valid(self, form)
@@ -117,3 +135,12 @@ class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Transaction
     template_name = 'transaction/transaction_edit.html'
     success_url = reverse_lazy('transaction:list_transaction')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        for purchase in self.object.purchase_set.all():
+            purchase.product.stock += purchase.amount
+            purchase.product.save()
+        success_url = self.get_success_url()
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
