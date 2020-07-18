@@ -8,7 +8,7 @@ from django.urls import reverse, NoReverseMatch
 
 class City(models.Model):
     name = models.CharField(
-        'City Name', max_length=24, unique=True,
+        'City Name', max_length=48, unique=True,
         validators=[RegexValidator('^[A-Z \.]*$', 'Only uppercase letters, space, and period are allowed.')]
     )
 
@@ -59,14 +59,18 @@ class Marketplace(models.Model):
 
 
 class Courier(models.Model):
-    name = models.CharField('Marketplace Name', max_length=24, unique=True)
-    short_name = models.CharField('Short Name', max_length=5, unique=True)
+    name = models.CharField('Marketplace Name', max_length=24)
+    type = models.CharField('Short Name', max_length=24, default='Universal')
+    short_name = models.CharField('Short Name', max_length=5, blank=True, null=True, default=None, unique=True)
+
+    class Meta:
+        unique_together = (('name', 'type'), )
 
     def get_absolute_url(self):
         return reverse('management:edit_courier', args=[self.pk])
 
     def __str__(self):
-        return self.name
+        return f'{self.short_name} ({self.name} {self.type})' if self.short_name else f'{self.name} {self.type}'
 
 
 class TransactionQuerySet(models.QuerySet):
@@ -77,12 +81,21 @@ class TransactionQuerySet(models.QuerySet):
             Q(marketplace__name__icontains=criteria.get('marketplace', '')) &
             Q(customer__name__icontains=criteria.get('customer', '')) &
             Q(city__name__icontains=criteria.get('city', '')) &
-            Q(purchase__product__code__icontains=criteria.get('purchases', '')) |
-            Q(purchase__product__name__icontains=criteria.get('purchases', '')) |
-            Q(purchase__product__color__icontains=criteria.get('purchases', '')) |
-            Q(purchase__product__size__icontains=criteria.get('purchases', '')) &
             Q(courier__name__icontains=criteria.get('courier', ''))
         ).distinct().order_by('date', 'number')
+        if criteria.get('packager') and criteria.get('packager') != 'None':
+            print('woof')
+            transactions = transactions.filter(Q(packager__username__icontains=criteria.get('packager', '')))
+        elif criteria.get('packager') == 'None':
+            print('meow')
+            transactions = transactions.filter(Q(packager=None))
+        if criteria.get('purchase'):
+            transactions = transactions.filter(
+                Q(purchase__product__code__icontains=criteria['purchase']) |
+                Q(purchase__product__name__icontains=criteria['purchase']) |
+                Q(purchase__product__color__icontains=criteria['purchase']) |
+                Q(purchase__product__size__icontains=criteria['purchase'])
+        )
         if criteria.get('is_prepared'):
             transactions = transactions.filter(is_prepared=criteria['is_prepared'])
         if criteria.get('is_packed'):
@@ -121,16 +134,16 @@ class Transaction(models.Model):
         return reverse('transaction:edit_transaction', args=[self.pk])
 
     def __str__(self):
-        return f'{self.marketplace}-{self.customer.name}-{self.courier}'
+        return f'{self.marketplace}-{self.customer}-{self.courier}'
 
 
 class Purchase(models.Model):
     transaction = models.ForeignKey(Transaction, verbose_name='Transaction', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, verbose_name='Product', help_text='Start typing to get product choices',
                                 on_delete=models.SET_NULL, null=True)
-    amount = models.PositiveIntegerField('Amount', default=1, null=False)
+    amount = models.PositiveIntegerField('Amount', default=0, null=False)
     additional_information = models.CharField('Additional Information', max_length=128, blank=True, null=False)
 
     def __str__(self):
-        return f'{self.transaction}-{self.product.name}({self.product.color}) -> {self.amount}' \
+        return f'{self.transaction.number} on {self.transaction.date}-{self.product.name}({self.product.color}) -> {self.amount}' \
                 + f' ({self.additional_information})' if {self.additional_information} else ''
