@@ -13,7 +13,7 @@ from django.views import generic
 
 from alkaf_administration.settings import DATETIME_FORMAT
 from .forms import TransactionForm, PurchaseFormSet, TransactionSearchForm, TransactionDuplicationForm
-from .models import Transaction, Product, City, Customer, Purchase
+from .models import Transaction, Product, City, Customer
 
 
 def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, default=datetime.today(), supress_error=True):
@@ -122,6 +122,8 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = self.object
+        if kwargs['instance'].date:
+            del kwargs['initial']['date']
         return kwargs
 
     def form_and_formset_valid(self, form, formset):
@@ -157,6 +159,8 @@ class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
         'date': datetime.today(),
         'number': Transaction.objects.filter(date=datetime.today()).aggregate(Max('number'))['number__max']
     }
+
+    DUP_MARKER_REGEX = re.compile(r'((?:\d)+)-th order')
 
     def post(self, request, *args, **kwargs):
         submission_form_kwargs = {'type': 'submission'}
@@ -212,12 +216,14 @@ class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
                     for purchase in purchases:
                         purchase.id = None
                         purchase.transaction = new_transaction
-                        # dup_marker_regex = re.compile(r'(\d)+-th order')
-                        # if re.search(dup_marker_regex, purchase.additional_information):
-                        #
-                        # re.subn(dup_marker_regex, '2-th', purchase.additional_information)
-                        purchase.additional_information += f'{i+1}-th order' if not purchase.additional_information \
-                                                            else f' ({i+1}-th order)'
+                        m = re.search(self.DUP_MARKER_REGEX, purchase.additional_information)
+                        if m:
+                            purchase.additional_information = re.sub(
+                                self.DUP_MARKER_REGEX, f'{i+int(m.groups()[0])}-th order', purchase.additional_information
+                            )
+                        else:
+                            purchase.additional_information += f'{i+1}-th order' if not purchase.additional_information\
+                                                                else f' ({i+1}-th order)'
                         print(purchase)
                         purchase.save()
         messages.success(self.request, _('Transaction duplication success!'))

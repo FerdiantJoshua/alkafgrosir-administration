@@ -5,9 +5,10 @@
   <div class="jumbotron">
     <h1>Welcome to Alkaf Administration !</h1>
     {% if user.is_authenticated %}
-        <h2>Hello {{ user.first_name }} {{ user.last_name }}</h2>
+      <h2>Hello {{ user.first_name }} {{ user.last_name }}</h2>
+      <h5><a href="{% url 'transaction:list_transaction' %}">Start managing transaction</a> or <a href="{% url 'management:list_product' %}">Update stocks</a></h5>
     {% else %}
-        <h2>Register or Login if you'd like to</h2>
+      <h2>Register or Login if you'd like to</h2>
     {% endif %}
   </div>
 </div>

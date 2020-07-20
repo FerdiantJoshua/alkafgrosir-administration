@@ -10,6 +10,19 @@ function overrideHelpTextLinksTarget(class_name) {
   })
 }
 
+function synchronizeIsPreparedAndIsPacked() {
+  $('#id_is_packed').on('click', function(){
+     if (this.checked == true) {
+      $('#id_is_prepared')[0].checked = true
+     }
+  })
+  $('#id_is_prepared').on('click', function(){
+     if (this.checked == false) {
+      $('#id_is_packed')[0].checked = false
+     }
+  })
+}
+
 function adjustAutocompleteFieldText(availableObjects, textInputs) {
   textInputs.each((idx, textInput) => {
     textInput = $(textInput)
@@ -62,6 +75,7 @@ function initializeInputField(newPurchaseForm, n) {
 
 $(document).ready(function() {
   overrideHelpTextLinksTarget('.helptext-urls')
+  synchronizeIsPreparedAndIsPacked()
 
   const availableCities = JSON.parse($('#available_city').text())
   const availableCustomers = JSON.parse($('#available_customer').text())

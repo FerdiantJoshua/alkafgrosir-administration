@@ -9,7 +9,6 @@ String.prototype.format = function() {
 $(document).ready(function() {
   $('.purchase-detail-button').each((key, value) => {
     value.addEventListener('click', () => {
-      console.log(value)
       var id = value.parentElement.id.split('_').pop()
       var transactionDate = $('#transaction_date_' + id).text()
       var transactionNumber = $('#transaction_number_' + id).text()
