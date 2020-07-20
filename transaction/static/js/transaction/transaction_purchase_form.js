@@ -31,7 +31,7 @@ function addAutocompleter(availableObjects, textInputs) {
   textInputs.each((idx, textInput) => {
     textInput = $(textInput)
     textInput.autocomplete({
-      minLength: 2,
+      minLength: 1,
       source: availableObjects,
       focus: function( event, ui ) {
         return false;
@@ -41,7 +41,7 @@ function addAutocompleter(availableObjects, textInputs) {
         textInput.next().val(ui.item.value)
         return false;
       }
-    });
+    })
 //    .focus(function(){
 //        $(this).autocomplete('search', $(this).val());
 //    });

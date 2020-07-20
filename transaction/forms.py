@@ -34,11 +34,10 @@ class PurchaseForm(forms.ModelForm):
         self.fields['amount'].initial = ''
 
     def clean(self):
-        self.cleaned_data = super().clean()
-        print(self.cleaned_data)
+        print('purchaseform cleaned_data:', self.cleaned_data)
         previous_amount = 0
         if self.instance:
-            print('purchase amount while cleaning:', self.instance.amount)
+            print('purchase\'s instance amount (cleaning process):', self.instance.amount)
             previous_amount = self.instance.amount
         if self.cleaned_data['amount'] - previous_amount > self.cleaned_data['product'].stock:
             error_msg = 'The amount of this product purchase is greater than the remaining stock!'
@@ -96,3 +95,35 @@ class TransactionSearchForm(forms.Form):
     packager = forms.CharField(required=False, help_text='Type \'None\' for no packager')
     is_prepared = forms.NullBooleanField(label='', required=False, widget=CustomNullBooleanSelect(choices=IS_PREPARED_CHOICES))
     is_packed = forms.NullBooleanField(label='', required=False, widget=CustomNullBooleanSelect(choices=IS_PACKED_CHOICES))
+
+
+class TransactionDuplicationForm(forms.Form):
+    def __init__(self, type='search', *args, **kwargs):
+        super(TransactionDuplicationForm, self).__init__(*args, **kwargs)
+        if type != 'search':
+            for field_name in self.fields:
+                if field_name not in ['times', 'omit_purchases']:
+                    self.fields[field_name].widget.input_type = 'hidden'
+                    self.fields[field_name].required = False
+        else:
+            self.fields['times'].widget.input_type = 'hidden'
+            self.fields['omit_purchases'].widget.input_type = 'hidden'
+
+    def clean(self):
+        transaction = Transaction.objects.get(date=self.cleaned_data['date'], number=self.cleaned_data['number'])
+        if not self.cleaned_data['omit_purchases']:
+            for purchase in transaction.purchase_set.all():
+                if self.cleaned_data['times'] * purchase.amount > purchase.product.stock:
+                    error_msg = f'The amount of product {purchase.product.name} {purchase.product.color} purchase will \
+                                be greater than the remaining stock if multiplied {self.cleaned_data["times"]} times!'
+                    raise ValidationError({'times': error_msg})
+        return self.cleaned_data
+
+    date = forms.DateField(input_formats=[DATETIME_FORMAT],
+                                 widget=forms.DateInput(format=DATETIME_FORMAT))
+    number = forms.IntegerField(min_value=1)
+    times = forms.IntegerField(initial=1, min_value=1, max_value=5,
+                               help_text='Duplicate the transaction this many times. Maximum 5 duplication at a time.')
+    omit_purchases = forms.BooleanField(required=False,
+        help_text='Duplicate the transaction without the purchases.'
+    )

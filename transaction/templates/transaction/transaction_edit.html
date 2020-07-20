@@ -8,7 +8,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/transaction/autocomplete.css' %}">
 {% endblock %}
 {% block content %}
-<div class="container">
+<div class="container pb-4">
   <div class="row">
     <h1>Edit Transaction</h1>
   </div>
@@ -41,8 +41,8 @@
     <a class="btn btn-secondary" href="{% url 'transaction:list_transaction' %}">
       Back
     </a>
-    <br>
-    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteConfirmationModal">
+    <br/>
+    <button type="button" class="btn btn-danger mt-2" data-toggle="modal" data-target="#deleteConfirmationModal">
       Delete transaction
     </button>
   </form>

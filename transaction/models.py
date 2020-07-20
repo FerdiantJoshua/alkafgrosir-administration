@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F, Max
 from django.urls import reverse, NoReverseMatch
 
 
@@ -60,7 +60,7 @@ class Marketplace(models.Model):
 
 class Courier(models.Model):
     name = models.CharField('Marketplace Name', max_length=24)
-    type = models.CharField('Short Name', max_length=24, default='Universal')
+    type = models.CharField('Short Name', max_length=24, blank=True, default='')
     short_name = models.CharField('Short Name', max_length=5, blank=True, null=True, default=None, unique=True)
 
     class Meta:
@@ -130,11 +130,17 @@ class Transaction(models.Model):
             raise ValueError(f'Problematic get_absolute_attribute_helptext_urls function in {__class__} .') from e
         return absolute_attribute_helptext_urls
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if not self.number:
+            prev_number = Transaction.objects.filter(date=self.date).aggregate(Max('number'))['number__max']
+            self.number = prev_number + 1 if prev_number else 1
+        super().save(force_insert, force_update, using, update_fields)
+
     def get_absolute_url(self):
         return reverse('transaction:edit_transaction', args=[self.pk])
 
     def __str__(self):
-        return f'{self.marketplace}-{self.customer}-{self.courier}'
+        return f'#{self.number} on {self.date} {self.marketplace}-{self.customer}-{self.courier}'
 
 
 class Purchase(models.Model):
@@ -143,7 +149,25 @@ class Purchase(models.Model):
                                 on_delete=models.SET_NULL, null=True)
     amount = models.PositiveIntegerField('Amount', default=0, null=False)
     additional_information = models.CharField('Additional Information', max_length=128, blank=True, null=False)
+    
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        previous_purchase = self.__class__.objects.filter(pk=self.pk).first()
+        print('previous purchase:', previous_purchase)
+        previous_amount = previous_purchase.amount if previous_purchase else 0
+        self.product.stock = F('stock') + previous_amount - self.amount
+        print('product after stock change:', self.product)
+        self.product.save()
+        super().save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        self.product.stock = F('stock') + self.amount
+        self.product.save()
+        print(self.product)
+        return super().delete(using, keep_parents)
 
     def __str__(self):
-        return f'{self.transaction.number} on {self.transaction.date}-{self.product.name}({self.product.color}) -> {self.amount}' \
-                + f' ({self.additional_information})' if {self.additional_information} else ''
+        output = f'{self.product.name}({self.product.color}) -> {self.amount} ({self.additional_information})'
+        try:
+            return f'{self.transaction.number} on {self.transaction.date}-{output}'
+        except Transaction.DoesNotExist as e:
+            return f'Independent purchase-{output}'

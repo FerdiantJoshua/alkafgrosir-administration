@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load base_extras %}
+{% load static %}
+{% block title %} Duplicate Transaction {% endblock %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/transaction/bootstrap-datepicker.min.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <h1>Duplicate Transaction</h1>
+  </div>
+
+  <form class="form" method="get">
+    {% include 'basic_form.html' with form_group_col_class='col-sm-6' %}
+    <button type="submit" class="btn btn-primary" value="Search">Search</button>
+    <a class="btn btn-secondary" href="{% url 'transaction:list_transaction' %}">
+      Back
+    </a>
+  </form>
+
+  <div class="flex-column mt-4">
+    {% if transaction %}
+      <h3>Transaction:</h3>
+      <div class="table-responsive-xl">
+        <table class="table table-striped table-sm">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">#</th>
+              <th scope="col">Marketplace</th>
+              <th scope="col">Customer</th>
+              <th scope="col">City</th>
+              <th scope="col">Purchases</th>
+              <th scope="col">Courier</th>
+              <th scope="col">Is Prepared</th>
+              <th scope="col">Is Packed</th>
+              <th scope="col">Packager</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>{{ transaction.date }}</th>
+              <th>{{ transaction.number }}</th>
+              <td>{{ transaction.marketplace }}</td>
+              <td>{{ transaction.customer }}</td>
+              <td>{{ transaction.city }}</td>
+              <td>
+                {{ transaction.purchase_set.all|render_purchase_querysets:'purchase-detail-button,purchaseDetailModal'|safe }}
+              </td>
+              <td>{{ transaction.courier }}</td>
+              <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
+              <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
+              <td>{{ transaction.packager }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No transaction found with that criteria.</p>
+    {% endif %}
+  </div>
+  {% if transaction %}
+    <form class="form" method="post">
+      {% csrf_token %}
+      {% include 'basic_form.html' with form=form_submission form_group_col_class='col-sm-6' %}
+    <button type="submit" class="btn btn-primary" value="Duplicate">Duplicate</button>
+    </form>
+  {% endif %}
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/transaction/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'js/transaction/datetimepicker.js' %}"></script>
+{% endblock %}

@@ -1,16 +1,33 @@
 import re
 from datetime import datetime
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction as django_transaction
 from django.db.models import Max
 from django.db.models.base import ModelBase
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from alkaf_administration.settings import DATETIME_FORMAT
-from .forms import TransactionForm, PurchaseFormSet, TransactionSearchForm
-from .models import Transaction, Product, City, Customer
+from .forms import TransactionForm, PurchaseFormSet, TransactionSearchForm, TransactionDuplicationForm
+from .models import Transaction, Product, City, Customer, Purchase
+
+
+def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, default=datetime.today(), supress_error=True):
+    if isinstance(string_date, datetime):
+        return string_date
+    string_date = string_date or ''
+    try:
+        date = datetime.strptime(string_date, datetime_format)
+    except ValueError as e:
+        if not supress_error:
+            print(e)
+            print('Returning default value:', default)
+        date = default
+    return date
 
 
 class TransactionListView(LoginRequiredMixin, generic.ListView):
@@ -24,11 +41,8 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
         params = dict(self.request.GET)
         for key in params:
             params[key] = params[key][0]
-        today_date = datetime.today()
-        params['date_start'] = datetime.strptime(params['date_start'], DATETIME_FORMAT) if params.get('date_start')\
-            else today_date
-        params['date_end'] = datetime.strptime(params['date_end'], DATETIME_FORMAT) if params.get('date_end')\
-            else today_date
+        params['date_start'] = get_date_in_safe_format(params.get('date_start'))
+        params['date_end'] = get_date_in_safe_format(params.get('date_end'))
         return params
 
     def get_queryset(self):
@@ -38,7 +52,8 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
         if 'form_search' not in kwargs:
-            context['form_search'] = TransactionSearchForm(initial=self._retrieve_default_get_params())
+            search_form = TransactionSearchForm(initial=self._retrieve_default_get_params())
+            context['form_search'] = search_form
 
         request_params = re.sub(r'&page=[0-9]*', '', self.request.get_full_path().split('/')[-1])
         context['request_params'] = '?' + request_params if '?' not in request_params else request_params
@@ -61,15 +76,18 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
-        self.purchase_formset = self.get_context_data()['formset']
-        if form.is_valid() and self.purchase_formset.is_valid():
-            return self.form_valid(form)
+        purchase_formset = self.get_context_data()['formset']
+        return self._handle_form_and_formset(form, purchase_formset)
+
+    def _handle_form_and_formset(self, form, formset):
+        if form.is_valid() and formset.is_valid():
+            return self.form_and_formset_valid(form, formset)
         else:
             return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
+        if self.request.method == 'POST':
             context['formset'] = PurchaseFormSet(self.request.POST, instance=kwargs.get('formset_instance'))
         else:
             context['formset'] = PurchaseFormSet(instance=kwargs.get('formset_instance'))
@@ -79,16 +97,13 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
         context['attribute_helptext_urls'] = context['form']._meta.model.get_absolute_attribute_helptext_urls()
         return context
 
-    def form_valid(self, form):
-        prev_number = Transaction.objects.filter(date=form.instance.date).aggregate(Max('number'))['number__max']
-        form.instance.number = prev_number + 1 if prev_number else 1
-        self.purchase_formset.instance = form.instance
-        for purchase_form in self.purchase_formset:
-            purchase_form.instance.product.stock -= purchase_form.instance.amount
-            purchase_form.instance.product.save()
-        form.save()
-        self.purchase_formset.save()
-        return super().form_valid(form)
+    def form_and_formset_valid(self, form, formset):
+        formset.instance = form.instance
+        with django_transaction.atomic():
+            form.save()
+            formset.save()
+        messages.success(self.request, _('Transaction creation success!'))
+        return self.form_valid(form)
 
 
 class TransactionEditView(TransactionCreateView, generic.DetailView):
@@ -99,10 +114,6 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        self.previous_amounts = []
-        for purchase_form in self.get_context_data()['formset']:
-            self.previous_amounts.append(purchase_form.instance.amount)
-        print('initial value:', self.previous_amounts)
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -113,22 +124,14 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
         kwargs['instance'] = self.object
         return kwargs
 
-    def form_valid(self, form):
+    def form_and_formset_valid(self, form, formset):
         form.instance.id = self.object.id
-        self.purchase_formset.instance = self.object
-        for i in range(len(self.purchase_formset)):
-            purchase_form = self.purchase_formset[i]
-            print('purchase amount after validation:', purchase_form.instance.amount)
-            print('purchase amount after validation, changed_data:', purchase_form.changed_data)
-            if 'amount' in purchase_form.changed_data:
-                purchase_form.instance.product.stock -= purchase_form.instance.amount - self.previous_amounts[i]
-                purchase_form.instance.product.save()
-            elif 'DELETE' in purchase_form.changed_data:
-                purchase_form.instance.product.stock += self.previous_amounts[i]
-                purchase_form.instance.product.save()
-        form.save()
-        self.purchase_formset.save()
-        return generic.FormView.form_valid(self, form)
+        formset.instance = self.object
+        with django_transaction.atomic():
+            form.save()
+            formset.save()
+        messages.success(self.request, _('Transaction edit success!'))
+        return self.form_valid(form)
 
 
 class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -139,8 +142,86 @@ class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         for purchase in self.object.purchase_set.all():
-            purchase.product.stock += purchase.amount
-            purchase.product.save()
+            purchase.delete()
         success_url = self.get_success_url()
         self.object.delete()
+        messages.success(self.request, _('Transaction deletion success!'))
         return HttpResponseRedirect(success_url)
+
+
+class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
+    template_name = 'transaction/transaction_duplicate.html'
+    success_url = reverse_lazy('transaction:list_transaction')
+    form_class = TransactionDuplicationForm
+    initial = {
+        'date': datetime.today(),
+        'number': Transaction.objects.filter(date=datetime.today()).aggregate(Max('number'))['number__max']
+    }
+
+    def post(self, request, *args, **kwargs):
+        submission_form_kwargs = {'type': 'submission'}
+        submission_form_kwargs.update(self.get_form_kwargs())
+        form_submission = self.form_class(**submission_form_kwargs)
+        if form_submission.is_valid():
+            return self.form_valid(form_submission)
+        else:
+            return self.form_invalid(form_submission)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        for key in self.request.GET:
+            if key == 'date':
+                initial[key] = get_date_in_safe_format(self.request.GET[key]) if key == 'date' else initial.get(key)
+            else:
+                initial[key] = self.request.GET[key]
+        print(initial)
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = context['form']
+        transaction = Transaction.objects.filter(
+            date=form.initial['date'], number=form.initial['number']
+        ).first()
+        context['transaction'] = transaction
+        if transaction and 'form_submission' not in kwargs:
+            submission_form_kwargs = {'type': 'submission'}
+            submission_form_kwargs.update(self.get_form_kwargs())
+            form_submission = self.form_class(**submission_form_kwargs)
+            context['form_submission'] = form_submission
+        return context
+
+    def form_valid(self, form):
+        date = get_date_in_safe_format(form.data['date'])
+        number = int(form.data['number'])
+        times = int(form.data['times'])
+        max_number_in_date = Transaction.objects.filter(date=date).aggregate(Max('number'))['number__max']
+        transaction = Transaction.objects.get(date=date, number=number)
+        purchases = transaction.purchase_set.all()
+        with django_transaction.atomic():
+            for i in range(1, times + 1):
+                transaction.id = None
+                transaction.number = number + i
+                new_transaction = Transaction.objects.create(
+                    number=max_number_in_date+i, date=transaction.date, marketplace=transaction.marketplace,
+                    customer=transaction.customer, city=transaction.city, courier=transaction.courier,
+                    packager=transaction.packager, is_prepared=transaction.is_prepared, is_packed=transaction.is_packed
+                )
+
+                if not form.data.get('omit_purchases'):
+                    for purchase in purchases:
+                        purchase.id = None
+                        purchase.transaction = new_transaction
+                        # dup_marker_regex = re.compile(r'(\d)+-th order')
+                        # if re.search(dup_marker_regex, purchase.additional_information):
+                        #
+                        # re.subn(dup_marker_regex, '2-th', purchase.additional_information)
+                        purchase.additional_information += f'{i+1}-th order' if not purchase.additional_information \
+                                                            else f' ({i+1}-th order)'
+                        print(purchase)
+                        purchase.save()
+        messages.success(self.request, _('Transaction duplication success!'))
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form_submission=form))

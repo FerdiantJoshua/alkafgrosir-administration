@@ -7,14 +7,17 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/transaction/floating-labels.css' %}">
 {% endblock %}
 {% block content %}
-<div class="container">
+<div class="container pb-4">
   <div class="row">
     <h1>Transactions</h1>
   </div>
 
-  <div class="row my-4">
-    <a class="btn btn-block btn-lg btn-primary" href="{% url 'transaction:create_transaction' %}">
+  <div class="row my-4 d-flex justify-content-center">
+    <a class="btn btn-block btn-lg btn-primary col-lg-9" href="{% url 'transaction:create_transaction' %}">
       <b>Add Transaction</b>
+    </a>
+    <a class="btn btn-block btn-lg btn-secondary col-lg-9" href="{% url 'transaction:duplicate_transaction' %}">
+      <b>Duplicate Transaction</b>
     </a>
   </div>
 
@@ -96,7 +99,7 @@
     </nav>
   </div>
 
-  <div class="row mt-b">
+  <div class="row">
     <h4>Search</h4>
   </div>
   <form class="form" method="get">
