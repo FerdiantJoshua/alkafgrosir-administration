@@ -2,31 +2,40 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
+from alkaf_administration.settings import LOGIN_URL
 from transaction.models import Marketplace
+from .urls import app_name, urlpatterns
+
+
+class AnonymousAccessTest(TestCase):
+    def test_deny_anonymous(self):
+        require_pk = ['edit', 'delete']
+        default_pk = 1
+        urls = list(map(lambda x: x.name, urlpatterns))
+        for url in urls:
+            complete_url = f'{app_name}:{url}'
+            url = reverse(complete_url, args=[default_pk]) if url.split('_')[0] in require_pk else reverse(complete_url)
+            response = self.client.get(url, follow=True)
+            self.assertRedirects(response, f'{reverse(LOGIN_URL)}?next={url}')
 
 
 class MarketplaceViewTest(TestCase):
     username = 'username'
     password = 'password'
-    
+
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
+        super().setUpTestData()
         User.objects.create_superuser(
             username=MarketplaceViewTest.username, password=MarketplaceViewTest.password
         )
 
-    def test_createview_deny_anonymous(self):
-        url = reverse('management:create_marketplace')
-        response = self.client.get(url, follow=True)
-        self.assertRedirects(response, f'{reverse("account:login")}?next={url}')
-        response = self.client.post(reverse('management:create_marketplace'), follow=True)
-        self.assertRedirects(response, f'{reverse("account:login")}?next={url}')
+    def setUp(self) -> None:
+        super().setUp()
+        self.client.login(username=self.username, password=self.password)
 
     def test_createview(self):
         url = reverse('management:create_marketplace')
-        self.client.login(username=self.username, password=self.password)
-
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code, 200)
 
