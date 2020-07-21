@@ -36,6 +36,7 @@ function adjustAutocompleteFieldText(availableObjects, textInputs) {
         }
       };
       textInput.val(label);
+      textInput.attr('value', label);
     }
   })
 }

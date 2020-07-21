@@ -1,19 +1,31 @@
+import csv
 import re
 from datetime import datetime
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction as django_transaction
 from django.db.models import Max
 from django.db.models.base import ModelBase
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
+from django.views.decorators.http import require_http_methods
 
 from alkaf_administration.settings import DATETIME_FORMAT
 from .forms import TransactionForm, PurchaseFormSet, TransactionSearchForm, TransactionDuplicationForm
 from .models import Transaction, Product, City, Customer
+
+
+def retrieve_default_get_params(get_request):
+    params = dict(get_request)
+    for key in params:
+        params[key] = params[key][0]
+    params['date_start'] = get_date_in_safe_format(params.get('date_start'))
+    params['date_end'] = get_date_in_safe_format(params.get('date_end'))
+    return params
 
 
 def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, default=datetime.today(), supress_error=True):
@@ -31,28 +43,20 @@ def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, defaul
 
 
 class TransactionListView(LoginRequiredMixin, generic.ListView):
-    paginate_by = 50
+    paginate_by = 20
     model = Transaction
     template_name = 'transaction/transaction_list.html'
     context_object_name = 'transactions'
     ordering = 'date'
 
-    def _retrieve_default_get_params(self):
-        params = dict(self.request.GET)
-        for key in params:
-            params[key] = params[key][0]
-        params['date_start'] = get_date_in_safe_format(params.get('date_start'))
-        params['date_end'] = get_date_in_safe_format(params.get('date_end'))
-        return params
-
     def get_queryset(self):
-        params = self._retrieve_default_get_params()
+        params = retrieve_default_get_params(self.request.GET)
         return Transaction.objects.search_by_criteria(params)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
         if 'form_search' not in kwargs:
-            search_form = TransactionSearchForm(initial=self._retrieve_default_get_params())
+            search_form = TransactionSearchForm(initial= retrieve_default_get_params(self.request.GET))
             context['form_search'] = search_form
 
         request_params = re.sub(r'&page=[0-9]*', '', self.request.get_full_path().split('/')[-1])
@@ -62,6 +66,46 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
 
 def _get_list_of_available_record(model_base: ModelBase):
     return list(map(lambda x: {'value': x.pk, 'label': str(x)}, model_base.objects.all()))
+
+
+@require_http_methods(['GET'])
+@login_required
+def export_transaction(request):
+    def _render_purchase_querysets(purchase_querysets):
+        output = []
+        for purchase in purchase_querysets:
+            purchase_text = f'{purchase.product.name} ({purchase.product.color}) = {purchase.amount}'
+            purchase_text += f' ({purchase.additional_information})' if purchase.additional_information else ''
+            output.append(purchase_text)
+        return ';'.join(output)
+
+    if request.method == 'GET':
+        params = retrieve_default_get_params(request.GET)
+        transactions = Transaction.objects.search_by_criteria(params)
+        if transactions:
+            response = HttpResponse(content_type='text/csv')
+            writer = csv.writer(response)
+            output = []
+            for transaction in transactions:
+                purchases = _render_purchase_querysets(transaction.purchase_set.all())
+                output.append(list(map(lambda x: str(x).replace(',', ';'), [
+                    transaction.date, transaction.number, transaction.marketplace, transaction.customer,
+                    transaction.city, purchases, transaction.courier
+                ])))
+            writer.writerows(output)
+
+            filename = 'transaction'
+            for key, value in params.items():
+                if value:
+                    value = str(value).split()[0] if 'date' in key else value
+                    filename += f'_{key}-{value}'.replace(' ', ',')
+            response['Content-Disposition'] = f'attachment; filename={filename}.csv"'
+
+            return response
+        else:
+            message = 'Unable to export, no transaction is found with that criteria!'
+            messages.error(request, message)
+            return HttpResponseRedirect('transaction:list_transaction')
 
 
 class TransactionCreateView(LoginRequiredMixin, generic.FormView):
@@ -216,15 +260,15 @@ class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
                     for purchase in purchases:
                         purchase.id = None
                         purchase.transaction = new_transaction
-                        m = re.search(self.DUP_MARKER_REGEX, purchase.additional_information)
-                        if m:
+                        purchase_dup_info = re.search(self.DUP_MARKER_REGEX, purchase.additional_information)
+                        if purchase_dup_info:
                             purchase.additional_information = re.sub(
-                                self.DUP_MARKER_REGEX, f'{i+int(m.groups()[0])}-th order', purchase.additional_information
+                                self.DUP_MARKER_REGEX,
+                                f'{int(purchase_dup_info.groups()[0])+1}-th order', purchase.additional_information
                             )
                         else:
                             purchase.additional_information += f'{i+1}-th order' if not purchase.additional_information\
                                                                 else f' ({i+1}-th order)'
-                        print(purchase)
                         purchase.save()
         messages.success(self.request, _('Transaction duplication success!'))
         return super().form_valid(form)
