@@ -90,8 +90,11 @@ def export_transaction(request):
                 purchases = _render_purchase_querysets(transaction.purchase_set.all())
                 output.append(list(map(lambda x: str(x).replace(',', ';'), [
                     transaction.date, transaction.number, transaction.marketplace, transaction.customer,
-                    transaction.city, purchases, transaction.courier
+                    transaction.city, purchases, transaction.courier, transaction.receipt_number,
+                    transaction.shipping_cost
                 ])))
+            writer.writerow(['date_start', '#', 'marketplace', 'customer', 'city', 'purchases', 'courier',
+                              'receipt_number', 'shipping_cost'])
             writer.writerows(output)
 
             filename = 'transaction'
@@ -99,7 +102,7 @@ def export_transaction(request):
                 if value:
                     value = str(value).split()[0] if 'date' in key else value
                     filename += f'_{key}-{value}'.replace(' ', ',')
-            response['Content-Disposition'] = f'attachment; filename={filename}.csv"'
+            response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
 
             return response
         else:

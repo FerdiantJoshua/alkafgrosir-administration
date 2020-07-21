@@ -112,6 +112,10 @@ class Transaction(models.Model):
     city = models.ForeignKey(City, verbose_name='City', on_delete=models.SET_NULL, null=True)
     courier = models.ForeignKey(Courier, verbose_name='Courier', on_delete=models.SET_NULL, null=True)
     packager = models.ForeignKey(User, verbose_name='Packager', on_delete=models.SET_NULL, blank=True, null=True)
+    receipt_number = models.CharField(
+        'Receipt Number', max_length=64, blank=True, help_text='Only uppercase letters, and numbers are allowed.',
+        validators=[RegexValidator('^[A-Z0-9]*$', 'Only uppercase letters, and numbers are allowed.')])
+    shipping_cost = models.PositiveIntegerField('Shipping Cost', blank=True, null=True)
     is_prepared = models.BooleanField('Is Prepared', default=False)
     is_packed = models.BooleanField('Is Packed', default=False)
 

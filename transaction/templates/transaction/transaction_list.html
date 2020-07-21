@@ -42,6 +42,8 @@
               <th scope="col">Is Prepared</th>
               <th scope="col">Is Packed</th>
               <th scope="col">Packager</th>
+              <th scope="col">Receipt Number</th>
+              <th scope="col">Shipping Cost</th>
               <th scope="col">Edit</th>
             </tr>
           </thead>
@@ -60,11 +62,13 @@
               <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
               <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
               <td>{{ transaction.packager }}</td>
+              <td>{{ transaction.receipt_number }}</td>
+              <td>{{ transaction.shipping_cost }}</td>
               <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
             </tr>
             {% empty %}
             <tr>
-              {% for i in 11|times %}
+              {% for i in 13|times %}
               <td>No data</td>
               {% endfor %}
             </tr>
