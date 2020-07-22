@@ -60,7 +60,7 @@ class Marketplace(models.Model):
 
 class Courier(models.Model):
     name = models.CharField('Marketplace Name', max_length=24)
-    type = models.CharField('Short Name', max_length=24, blank=True, default='')
+    type = models.CharField('Type', max_length=24, blank=True, default='')
     short_name = models.CharField('Short Name', max_length=5, blank=True, null=True, default=None, unique=True)
 
     class Meta:
