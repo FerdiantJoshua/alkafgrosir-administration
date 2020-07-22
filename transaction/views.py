@@ -9,7 +9,7 @@ from django.db import transaction as django_transaction
 from django.db.models import Max
 from django.db.models.base import ModelBase
 from django.http import HttpResponseRedirect, HttpResponse
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.http import require_http_methods
@@ -108,7 +108,7 @@ def export_transaction(request):
         else:
             message = 'Unable to export, no transaction is found with that criteria!'
             messages.error(request, message)
-            return HttpResponseRedirect('transaction:list_transaction')
+            return HttpResponseRedirect(reverse('transaction:list_transaction'))
 
 
 class TransactionCreateView(LoginRequiredMixin, generic.FormView):
