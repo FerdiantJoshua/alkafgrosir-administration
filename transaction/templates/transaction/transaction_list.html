@@ -21,9 +21,24 @@
     </a>
   </div>
 
-  <div class="d-flex flex-column align-items-end mb-3">
-    <a class="btn btn-sm btn-outline-secondary" href="{% url 'transaction:export_transaction' %}{{ request_params }}">Export to CSV</a>
-    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.object_list.count }} results
+  <div class="d-flex justify-content-between align-items-end mb-3">
+    <div class="btn-group flex-wrap dropright">
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'transaction:export_transaction' %}{{ request_params }}">Export to CSV</a>
+      <button id="dropdownMenuButton" class="btn btn-sm btn-outline-secondary buttons-collection dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Column Visibility</button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a id="col-vis-btn-marketplace" class="dropdown-item col-vis-btn active" href="#">Marketplace</a>
+        <a id="col-vis-btn-customer"class="dropdown-item col-vis-btn active" href="#">Customer</a>
+        <a id="col-vis-btn-city"class="dropdown-item col-vis-btn active" href="#">City</a>
+        <a id="col-vis-btn-purchases"class="dropdown-item col-vis-btn active" href="#">Purchases</a>
+        <a id="col-vis-btn-courier"class="dropdown-item col-vis-btn active" href="#">Courier</a>
+        <a id="col-vis-btn-is_prepared"class="dropdown-item col-vis-btn active" href="#">Is Prepared</a>
+        <a id="col-vis-btn-is_packed"class="dropdown-item col-vis-btn active" href="#">Is Packed</a>
+        <a id="col-vis-btn-packager"class="dropdown-item col-vis-btn active" href="#">Packager</a>
+        <a id="col-vis-btn-receipt_number"class="dropdown-item col-vis-btn active" href="#">Receipt Number</a>
+        <a id="col-vis-btn-shipping_cost"class="dropdown-item col-vis-btn active" href="#">Shipping Cost</a>
+      </div>
+    </div>
+    <span class="text-right">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.object_list.count }} results</span>
   </div>
 
   <div class="row">
@@ -32,49 +47,46 @@
         <table class="table table-striped table-sm">
           <thead class="thead-dark">
             <tr>
-              <th scope="col">Date</th>
-              <th scope="col">#</th>
-              <th scope="col">Marketplace</th>
-              <th scope="col">Customer</th>
-              <th scope="col">City</th>
-              <th scope="col">Purchases</th>
-              <th scope="col">Courier</th>
-              <th scope="col">Is Prepared</th>
-              <th scope="col">Is Packed</th>
-              <th scope="col">Packager</th>
-              <th scope="col">Receipt Number</th>
-              <th scope="col">Shipping Cost</th>
-              <th scope="col">Edit</th>
+              <th class="col-date" scope="col">Date</th>
+              <th class="col-number" scope="col">#</th>
+              <th class="col-marketplace" scope="col">Marketplace</th>
+              <th class="col-customer" scope="col">Customer</th>
+              <th class="col-city" scope="col">City</th>
+              <th class="col-purchases" scope="col">Purchases</th>
+              <th class="col-courier" scope="col">Courier</th>
+              <th class="col-is_prepared" scope="col">Is Prepared</th>
+              <th class="col-is_packed" scope="col">Is Packed</th>
+              <th class="col-packager" scope="col">Packager</th>
+              <th class="col-receipt_number" scope="col">Receipt Number</th>
+              <th class="col-shipping_cost" scope="col">Shipping Cost</th>
+              <th class="col-edit" scope="col">Edit</th>
             </tr>
           </thead>
           <tbody>
             {% for transaction in transactions %}
             <tr>
-              <th id="transaction_date_{{ forloop.counter }}">{{ transaction.date }}</th>
-              <th id="transaction_number_{{ forloop.counter }}">{{ transaction.number }}</th>
-              <td>{{ transaction.marketplace }}</td>
-              <td id="transaction_customer_{{ forloop.counter }}">{{ transaction.customer }}</td>
-              <td>{{ transaction.city }}</td>
-              <td id="transaction_purchase_{{ forloop.counter }}">
+              <th class="col-date" id="transaction_date_{{ forloop.counter }}">{{ transaction.date }}</th>
+              <th class="col-number" id="transaction_number_{{ forloop.counter }}">{{ transaction.number }}</th>
+              <td class="col-marketplace">{{ transaction.marketplace }}</td>
+              <td class="col-customer" id="transaction_customer_{{ forloop.counter }}">{{ transaction.customer }}</td>
+              <td class="col-city">{{ transaction.city }}</td>
+              <td class="col-purchases" id="transaction_purchase_{{ forloop.counter }}">
                 {{ transaction.purchase_set.all|render_purchase_querysets:'purchase-detail-button,purchaseDetailModal'|safe }}
               </td>
-              <td>{{ transaction.courier }}</td>
-              <td>{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
-              <td>{{ transaction.is_packed|yesno:'Yes,No' }}</td>
-              <td>{{ transaction.packager }}</td>
-              <td>{{ transaction.receipt_number }}</td>
-              <td>{{ transaction.shipping_cost }}</td>
-              <td><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
-            </tr>
-            {% empty %}
-            <tr>
-              {% for i in 13|times %}
-              <td>No data</td>
-              {% endfor %}
+              <td class="col-courier">{{ transaction.courier }}</td>
+              <td class="col-is_prepared">{{ transaction.is_prepared|yesno:'Yes,No' }}</td>
+              <td class="col-is_packed">{{ transaction.is_packed|yesno:'Yes,No' }}</td>
+              <td class="col-packager">{{ transaction.packager }}</td>
+              <td class="col-receipt_number">{{ transaction.receipt_number }}</td>
+              <td class="col-shipping_cost">{{ transaction.shipping_cost }}</td>
+              <td class="col-edit"><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
+        {% if not transactions %}
+          <p>No transaction is found with that criteria.</p>
+        {% endif %}
       </div>
     </div>
   </div>
