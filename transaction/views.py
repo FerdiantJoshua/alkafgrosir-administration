@@ -28,9 +28,11 @@ def retrieve_default_get_params(get_request):
     return params
 
 
-def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, default=datetime.today(), supress_error=True):
+def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, default=None, supress_error=True):
     if isinstance(string_date, datetime):
         return string_date
+    # Default date setting is done in function level to make sure datetime.today() always updates
+    default = datetime.today() if default is None else default
     string_date = string_date or ''
     try:
         date = datetime.strptime(string_date, datetime_format)
@@ -56,7 +58,7 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
         if 'form_search' not in kwargs:
-            search_form = TransactionSearchForm(initial= retrieve_default_get_params(self.request.GET))
+            search_form = TransactionSearchForm(initial=retrieve_default_get_params(self.request.GET))
             context['form_search'] = search_form
 
         request_params = re.sub(r'&page=[0-9]*', '', self.request.get_full_path().split('/')[-1])
