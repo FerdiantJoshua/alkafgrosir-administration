@@ -108,9 +108,10 @@ def export_transaction(request):
 
             return response
         else:
-            message = 'Unable to export, no transaction is found with that criteria!'
+            message = 'Unable to export, no transaction is found with those criteria!'
             messages.error(request, message)
-            return HttpResponseRedirect(reverse('transaction:list_transaction'))
+            url = request.META.get('HTTP_REFERER') or reverse('transaction:list_transaction')
+            return HttpResponseRedirect(url)
 
 
 @require_http_methods(['GET'])
@@ -125,9 +126,10 @@ def update_status_is_packed(request):
                         (affects {transactions.count()} transactions)'
             messages.success(request, message)
         else:
-            message = 'Unable to change status, no transaction is found with that criteria!'
+            message = 'Unable to change status, no transaction is found with those criteria!'
             messages.error(request, message)
-        return HttpResponseRedirect(reverse('transaction:list_transaction'))
+        url = request.META.get('HTTP_REFERER') or reverse('transaction:list_transaction')
+        return HttpResponseRedirect(url)
 
 
 class TransactionCreateView(LoginRequiredMixin, generic.FormView):
@@ -172,6 +174,14 @@ class TransactionCreateView(LoginRequiredMixin, generic.FormView):
         return self.form_valid(form)
 
 
+def _extract_path_param_value_as_str(full_path, first_param_name):
+    get_params = ''
+    splitted_path = full_path.split(f'?{first_param_name}=')
+    if len(splitted_path) == 2:
+        get_params = splitted_path[-1]
+    return get_params
+
+
 class TransactionEditView(TransactionCreateView, generic.DetailView):
     model = Transaction
     template_name = 'transaction/transaction_edit.html'
@@ -180,10 +190,8 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
 
     def get_success_url(self):
         success_url = super().get_success_url()
-        splitted_path = self.request.get_full_path().split('?next=')
-        if len(splitted_path) == 2:
-            success_url = splitted_path[-1]
-        return success_url
+        next_page_url = _extract_path_param_value_as_str(self.request.get_full_path(), 'next')
+        return success_url if not next_page_url else next_page_url
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -191,7 +199,8 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(formset_instance=self.object, **kwargs)
-        context['next_page_params'] = '?' + self.request.get_full_path().split('?', 1)[-1]
+        splitted_path = self.request.get_full_path().split('?', 1)
+        context['next_page_url_params'] = '?' + splitted_path[-1] if len(splitted_path) == 2 else ''
         return context
 
     def get_form_kwargs(self):
@@ -216,14 +225,18 @@ class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):
     template_name = 'transaction/transaction_edit.html'
     success_url = reverse_lazy('transaction:list_transaction')
 
+    def get_success_url(self):
+        success_url = super().get_success_url()
+        next_page_url = _extract_path_param_value_as_str(self.request.get_full_path(), 'next')
+        return success_url if not next_page_url else next_page_url
+
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         for purchase in self.object.purchase_set.all():
             purchase.delete()
-        success_url = self.get_success_url()
         self.object.delete()
         messages.success(self.request, _('Transaction deletion success!'))
-        return HttpResponseRedirect(success_url)
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):

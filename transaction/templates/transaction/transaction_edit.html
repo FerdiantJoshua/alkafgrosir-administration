@@ -12,7 +12,7 @@
   <div class="row">
     <h1>Edit Transaction</h1>
   </div>
-  <form method="post" action="{% url 'transaction:edit_transaction' transaction.id %}{{ next_page_params }}">
+  <form method="post" action="{% url 'transaction:edit_transaction' transaction.id %}{{ next_page_url_params }}">
     {% csrf_token %}
     {% include 'autocomplete_form.html' with form_group_col_class='col-6'%}
 
@@ -49,8 +49,10 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-{% url 'management:delete_transaction' transaction.id as delete_url %}
+{% url 'transaction:delete_transaction' transaction.id as delete_url %}
+{% with delete_url|add:next_page_url_params as delete_url %}
 {% include 'delete_confirmation_modal.html' with modal_id='deleteConfirmationModal' object_name='transaction' delete_url=delete_url %}
+{% endwith %}
 
 {{ available_customer|json_script:"available_customer" }}
 {{ available_city|json_script:"available_city" }}
