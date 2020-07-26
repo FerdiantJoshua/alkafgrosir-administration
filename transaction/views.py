@@ -113,6 +113,23 @@ def export_transaction(request):
             return HttpResponseRedirect(reverse('transaction:list_transaction'))
 
 
+@require_http_methods(['GET'])
+@login_required
+def update_status_is_packed(request):
+    if request.method == 'GET':
+        params = retrieve_default_get_params(request.GET)
+        transactions = Transaction.objects.search_by_criteria(params)
+        if transactions:
+            transactions.update(is_prepared=True, is_packed=True)
+            message = f'Is_prepared and Is_packed status successfuly updated! \
+                        (affects {transactions.count()} transactions)'
+            messages.success(request, message)
+        else:
+            message = 'Unable to change status, no transaction is found with that criteria!'
+            messages.error(request, message)
+        return HttpResponseRedirect(reverse('transaction:list_transaction'))
+
+
 class TransactionCreateView(LoginRequiredMixin, generic.FormView):
     template_name = 'transaction/transaction_create.html'
     form_class = TransactionForm
@@ -161,12 +178,21 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
     form_class = TransactionForm
     success_url = reverse_lazy('transaction:list_transaction')
 
+    def get_success_url(self):
+        success_url = super().get_success_url()
+        splitted_path = self.request.get_full_path().split('?next=')
+        if len(splitted_path) == 2:
+            success_url = splitted_path[-1]
+        return success_url
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(formset_instance=self.object, **kwargs)
+        context =  super().get_context_data(formset_instance=self.object, **kwargs)
+        context['next_page_params'] = '?' + self.request.get_full_path().split('?', 1)[-1]
+        return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

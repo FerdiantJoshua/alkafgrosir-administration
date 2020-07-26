@@ -37,6 +37,7 @@
         <a id="col-vis-btn-receipt_number"class="dropdown-item col-vis-btn active" href="#">Receipt Number</a>
         <a id="col-vis-btn-shipping_cost"class="dropdown-item col-vis-btn active" href="#">Shipping Cost</a>
       </div>
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'transaction:update_status_transaction' %}{{ request_params }}">Update all packed status</a>
     </div>
     <span class="text-right">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.object_list.count }} results</span>
   </div>
@@ -78,8 +79,8 @@
               <td class="col-is_packed">{{ transaction.is_packed|yesno:'Yes,No' }}</td>
               <td class="col-packager">{{ transaction.packager }}</td>
               <td class="col-receipt_number">{{ transaction.receipt_number }}</td>
-              <td class="col-shipping_cost">{{ transaction.shipping_cost }}</td>
-              <td class="col-edit"><a href="{{ transaction.get_absolute_url }}">Edit</a></td>
+              <td class="col-shipping_cost">{% if transaction.shipping_cost %}Rp{{ transaction.shipping_cost }}{% else %}-{% endif %}</td>
+              <td class="col-edit"><a href="{{ transaction.get_absolute_url }}?next={{ request.path }}{{ request_params }}&page={{ page_obj.number }}">Edit</a></td>
             </tr>
             {% endfor %}
           </tbody>

@@ -139,7 +139,7 @@ TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
-USE_L10N = False
+USE_L10N = True
 
 USE_TZ = True
 
@@ -164,5 +164,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # ETC
 NUMBER_GROUPING = 3
 USE_THOUSAND_SEPARATOR = True
-THOUSAND_SEPARATOR = '.'
-DECIMAL_SEPARATOR = ','

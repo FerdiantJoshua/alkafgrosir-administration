@@ -12,7 +12,7 @@
   <div class="row">
     <h1>Edit Transaction</h1>
   </div>
-  <form method="post" action="{% url 'transaction:edit_transaction' transaction.id %}">
+  <form method="post" action="{% url 'transaction:edit_transaction' transaction.id %}{{ next_page_params }}">
     {% csrf_token %}
     {% include 'autocomplete_form.html' with form_group_col_class='col-6'%}
 
