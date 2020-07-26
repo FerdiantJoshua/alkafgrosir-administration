@@ -121,10 +121,10 @@ def update_status_is_packed(request):
         params = retrieve_default_get_params(request.GET)
         transactions = Transaction.objects.search_by_criteria(params)
         if transactions:
-            transactions.update(is_prepared=True, is_packed=True)
             message = f'Is_prepared and Is_packed status successfuly updated! \
                         (affects {transactions.count()} transactions)'
             messages.success(request, message)
+            transactions.update(is_prepared=True, is_packed=True)
         else:
             message = 'Unable to change status, no transaction is found with those criteria!'
             messages.error(request, message)
