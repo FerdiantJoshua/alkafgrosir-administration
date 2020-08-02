@@ -39,7 +39,8 @@ class PurchaseForm(forms.ModelForm):
         if self.instance:
             print('purchase\'s instance amount (cleaning process):', self.instance.amount)
             previous_amount = self.instance.amount
-        if self.cleaned_data['amount'] - previous_amount > self.cleaned_data['product'].stock:
+        if (self.cleaned_data.get('amount') and self.cleaned_data.get('product')) and \
+            self.cleaned_data['amount'] - previous_amount > self.cleaned_data['product'].stock:
             error_msg = 'The amount of this product purchase is greater than the remaining stock!'
             raise ValidationError({'amount': error_msg})
         return self.cleaned_data
