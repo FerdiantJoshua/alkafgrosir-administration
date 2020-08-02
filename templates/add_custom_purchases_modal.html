@@ -1,0 +1,22 @@
+{% extends 'basic_modal.html' %}
+
+{% block modal_title_message %}Add Custom Purchases{% endblock %}
+
+{% block modal_body %}
+<input id="custom-product-input" class="form-control" type="text" autofocus>
+<small class="form-text text-muted">Fill in with format: <b>product_1 color_1 amount, color_2 amount,.. ;product_2 color_1 amount, color_2 amount,.. ;..</b></small>
+<button id="generate-custom-product" class="btn btn-primary mt-3">Generate Purchases</button>
+<div id="generated-product-container" class="d-none mt-3">
+  <h4>Products:</h4>
+  <ol id="generated-product-list">
+    <li>Product 1</li>
+    <li>Product 2</li>
+    <li>Product 3</li>
+  </ol>
+</div>
+{% endblock %}
+
+{% block modal_footer %}
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+<button type="button" id="add-custom-purchases-btn" class="btn btn-primary" data-dismiss="modal">Add purchases</button>
+{% endblock %}
