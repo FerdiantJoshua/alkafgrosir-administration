@@ -44,6 +44,26 @@ def get_date_in_safe_format(string_date, datetime_format=DATETIME_FORMAT, defaul
     return date
 
 
+def _get_list_of_available_record(model_base: ModelBase):
+    def abbreviate(text, full_single_word=False):
+        stripped = text.strip().lower()
+        splitted = stripped.split()
+        if len(splitted) > 1:
+            return ''.join(list(map(lambda x: x[0], splitted)))
+        elif not full_single_word:
+            return stripped[:3]
+        else:
+            return stripped
+
+    if model_base is Product:
+        return list(map(
+            lambda x: {'value': x.pk, 'label': str(x), 'name': abbreviate(x.name, True), 'color': abbreviate(x.color)},
+            model_base.objects.all()
+        ))
+    else:
+        return list(map(lambda x: {'value': x.pk, 'label': str(x)}, model_base.objects.all()))
+
+
 class TransactionListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 20
     model = Transaction
@@ -64,10 +84,6 @@ class TransactionListView(LoginRequiredMixin, generic.ListView):
         request_params = re.sub(r'&page=[0-9]*', '', self.request.get_full_path().split('/')[-1])
         context['request_params'] = '?' + request_params if '?' not in request_params else request_params
         return context
-
-
-def _get_list_of_available_record(model_base: ModelBase):
-    return list(map(lambda x: {'value': x.pk, 'label': str(x)}, model_base.objects.all()))
 
 
 @require_http_methods(['GET'])

@@ -30,10 +30,19 @@
     </div>
 
     <div class="form-group">
-      <a id="add-purchase-button" href="#">Add more purchases</a>
-    </div>
-    <div class="form-group">
-      <a id="remove-purchase-button" class="text-danger" href="#">Remove last purchase</a>
+      <div class="form-row">
+        <div class="col-6">
+          <a id="add-purchase-button" href="#">Add more purchases</a>
+        </div>
+        <div class="col-6">
+          <a id="add-custom-purchases-button" href="#" data-toggle="modal" data-target="#addCustomPurchasesModal">Add custom purchases</a>
+        </div>
+      </div>
+      <div class="form-row mt-2">
+        <div class="col-12">
+          <a id="remove-purchase-button" class="text-danger" href="#">Remove last purchase</a>
+        </div>
+      </div>
     </div>
 
     <button type="submit"class="btn btn-primary" value="Update transaction">Update transaction</button>
@@ -47,6 +56,9 @@
     </button>
   </form>
 </div>
+
+<!-- Add Custom Purchases Modal -->
+{% include 'add_custom_purchases_modal.html' with modal_id='addCustomPurchasesModal' additional_class='modal-lg' %}
 
 <!-- Delete Confirmation Modal -->
 {% url 'transaction:delete_transaction' transaction.id as delete_url %}
