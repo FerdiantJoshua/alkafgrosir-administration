@@ -97,6 +97,9 @@ def export_transaction(request):
             output.append(purchase_text)
         return ';'.join(output)
 
+    def _shorten_kabupaten(city_name):
+        return str(city_name).replace('KABUPATEN', 'KAB.')
+
     if request.method == 'GET':
         params = retrieve_default_get_params(request.GET)
         transactions = Transaction.objects.search_by_criteria(params)
@@ -108,7 +111,7 @@ def export_transaction(request):
                 purchases = _render_purchase_querysets(transaction.purchase_set.all())
                 output.append(list(map(lambda x: str(x).replace(',', ';'), [
                     transaction.date, transaction.number, transaction.marketplace, transaction.customer,
-                    transaction.city, purchases, transaction.courier, transaction.receipt_number,
+                    _shorten_kabupaten(transaction.city), purchases, transaction.courier, transaction.receipt_number,
                     transaction.shipping_cost
                 ])))
             writer.writerow(['date_start', '#', 'marketplace', 'customer', 'city', 'purchases', 'courier',
