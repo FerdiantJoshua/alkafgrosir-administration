@@ -23,7 +23,7 @@ function synchronizeIsPreparedAndIsPacked() {
   })
 }
 
-function adjustAutocompleteFieldText(availableObjects, textInputs) {
+function synchronizeAutocompleteFieldText(availableObjects, textInputs) {
   textInputs.each((idx, textInput) => {
     textInput = $(textInput)
     let label = ''
@@ -216,16 +216,16 @@ $(document).ready(function() {
   const availableCustomers = JSON.parse($('#available_customer').text())
   const availableProducts = JSON.parse($('#available_product').text())
 
-// SET CITY AUTOCOMPLETE
+// SET AUTOCOMPLETE
   const cityTextInputs = $('.city-autocompleter')
   const customerTextInputs = $('.customer-autocompleter')
   let productTextInputs = $('.product-autocompleter')
   addAutocompleter(availableCustomers, customerTextInputs)
   addAutocompleter(availableCities, cityTextInputs)
   addAutocompleter(availableProducts, productTextInputs)
-  adjustAutocompleteFieldText(availableCustomers, customerTextInputs)
-  adjustAutocompleteFieldText(availableCities, cityTextInputs)
-  adjustAutocompleteFieldText(availableProducts, productTextInputs)
+  synchronizeAutocompleteFieldText(availableCustomers, customerTextInputs)
+  synchronizeAutocompleteFieldText(availableCities, cityTextInputs)
+  synchronizeAutocompleteFieldText(availableProducts, productTextInputs)
 
   
   const purchaseFormsetClass = '.purchase-formset'
