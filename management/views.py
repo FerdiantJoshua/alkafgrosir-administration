@@ -178,6 +178,11 @@ class ProductListView(LoginRequiredMixin, generic.ListView):
     template_name = 'management/product_list.html'
     context_object_name = 'products'
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        context['running_outs'] = Product.objects.filter(stock__lte=12)
+        return context
+
 
 class ProductEditView(LoginRequiredMixin, generic.FormView, generic.DetailView):
     model = Product

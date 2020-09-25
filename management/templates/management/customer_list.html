@@ -4,14 +4,40 @@
 {% block management_content %}
 <div class="container">
   <h1>Customer</h1>
-  <div class="row">
-    <ul>
-      {% for customer in customers %}
-        <li><a href="{{ customer.get_absolute_url }}">{{ customer }}</a></li>
-      {% empty %}
-        <li>No recorded customers.</li>
-      {% endfor %}
-    </ul>
+  <div class="row pt-3">
+    
+    <div class="row">
+      <div class="col">
+        <div class="table-responsive-xl">
+          <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+              <tr>
+                <th class="col-number" scope="col">#</th>
+                <th class="col-name" scope="col">Name (Click to Edit)</th>
+                <th class="col-username" scope="col">Username</th>
+                <th class="col-total-transactions" scope="col">Total Transactions</th>
+                <th class="col-last-transactions" scope="col">Last Transaction</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for customer in customers %}
+              <tr>
+                <th class="col-number">{{ forloop.counter }}</th>
+                <td class="col-name"><a href="{{ customer.get_absolute_url }}">{{ customer }}</a></td>
+                <td class="col-username">{{ customer.username|default_if_none:"-" }}</td>
+                <td class="col-total-transactions">TBD</td>
+                <td class="col-last-transactions">TBD</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if not customers %}
+            <p>No recorded customers.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
   </div>
   <div class="row">
     <a class="btn btn-primary" href="{% url 'management:create_customer' %}">

@@ -4,14 +4,38 @@
 {% block management_content %}
 <div class="container">
   <h1>Courier</h1>
-  <div class="row">
-    <ul>
-      {% for courier in couriers %}
-        <li><a href="{{ courier.get_absolute_url }}">{{ courier }}</a></li>
-      {% empty %}
-        <li>No recorded couriers.</li>
-      {% endfor %}
-    </ul>
+  <div class="row pt-3">
+    
+    <div class="row">
+      <div class="col">
+        <div class="table-responsive-xl">
+          <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+              <tr>
+                <th class="col-number" scope="col">#</th>
+                <th class="col-name" scope="col">Name (Click to Edit)</th>
+                <th class="col-type" scope="col">Type</th>
+                <th class="col-short-name" scope="col">Short Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for courier in couriers %}
+              <tr>
+                <th class="col-number">{{ forloop.counter }}</th>
+                <td class="col-name"><a href="{{ courier.get_absolute_url }}">{{ courier }}</a></td>
+                <td class="col-type">{{ courier.type }}</td>
+                <td class="col-short-name">{{ courier.short_name|default_if_none:"-" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if not couriers %}
+            <p>No recorded couriers.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
   </div>
   <div class="row">
     <a class="btn btn-primary" href="{% url 'management:create_courier' %}">

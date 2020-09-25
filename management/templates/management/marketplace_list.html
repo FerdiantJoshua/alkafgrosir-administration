@@ -4,14 +4,36 @@
 {% block management_content %}
 <div class="container">
   <h1>Marketplace</h1>
-  <div class="row">
-    <ul>
-      {% for marketplace in marketplaces %}
-        <li><a href="{{ marketplace.get_absolute_url }}">{{ marketplace }}</a></li>
-      {% empty %}
-        <li>No recorded marketplaces.</li>
-      {% endfor %}
-    </ul>
+  <div class="row pt-3">
+
+    <div class="row">
+      <div class="col">
+        <div class="table-responsive-xl">
+          <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+              <tr>
+                <th class="col-number" scope="col">#</th>
+                <th class="col-name" scope="col">Name (Click to Edit)</th>
+                <th class="col-short-name" scope="col">Short Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for marketplace in marketplaces %}
+              <tr>
+                <th class="col-number">{{ forloop.counter }}</th>
+                <td class="col-name"><a href="{{ marketplace.get_absolute_url }}">{{ marketplace }}</a></td>
+                <td class="col-short-name">{{ marketplace.short_name|default_if_none:"-" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if not marketplaces %}
+            <p>No recorded marketplaces.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
   </div>
   <div class="row">
     <a class="btn btn-primary" href="{% url 'management:create_marketplace' %}">

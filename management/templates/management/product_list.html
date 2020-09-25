@@ -4,14 +4,82 @@
 {% block management_content %}
 <div class="container">
   <h1>Product</h1>
-  <div class="row">
-    <ul>
-      {% for product in products %}
-        <li><a href="{{ product.get_absolute_url }}">{{ product }}</a></li>
-      {% empty %}
-        <li>No recorded products.</li>
-      {% endfor %}
-    </ul>
+  <div class="row pt-3">
+
+    <h2>All Products</h2>
+    <div class="row">
+      <div class="col">
+        <div class="table-responsive-xl">
+          <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+              <tr>
+                <th class="col-number" scope="col">#</th>
+                <th class="col-complete-name" scope="col">Complete Name (Click to Edit)</th>
+                <th class="col-stock" scope="col">Stock</th>
+                <th class="col-code" scope="col">Code</th>
+                <th class="col-name" scope="col">Name</th>
+                <th class="col-color" scope="col">Color</th>
+                <th class="col-size" scope="col">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in products %}
+              <tr>
+                <th class="col-number">{{ forloop.counter }}</th>
+                <td class="col-complete-name"><a href="{{ product.get_absolute_url }}">{{ product }}</a></td>
+                <td class="col-stock">{{ product.stock }}</td>
+                <td class="col-code">{{ product.code }}</td>
+                <td class="col-name">{{ product.name }}</td>
+                <td class="col-color">{{ product.color }}</td>
+                <td class="col-size">{{ product.size }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if not products %}
+            <p>No recorded products.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <h2>Running Out Products</h2>
+    <div class="row">
+      <div class="col">
+        <div class="table-responsive-xl">
+          <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+              <tr>
+                <th class="col-number" scope="col">#</th>
+                <th class="col-complete-name" scope="col">Complete Name (Click to Edit)</th>
+                <th class="col-stock" scope="col">Stock</th>
+                <th class="col-code" scope="col">Code</th>
+                <th class="col-name" scope="col">Name</th>
+                <th class="col-color" scope="col">Color</th>
+                <th class="col-size" scope="col">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in running_outs %}
+              <tr>
+                <th class="col-number">{{ forloop.counter }}</th>
+                <td class="col-complete-name"><a href="{{ product.get_absolute_url }}">{{ product }}</a></td>
+                <td class="col-stock">{{ product.stock }}</td>
+                <td class="col-code">{{ product.code }}</td>
+                <td class="col-name">{{ product.name }}</td>
+                <td class="col-color">{{ product.color }}</td>
+                <td class="col-size">{{ product.size }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if not running_outs %}
+            <p>No recorded running out products.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
   </div>
   <div class="row">
     <a class="btn btn-primary" href="{% url 'management:create_product' %}">
