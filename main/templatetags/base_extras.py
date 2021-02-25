@@ -21,7 +21,7 @@ def append_class(form_field, arg):
 
 @register.filter()
 def add_placeholder(form_field):
-    """Returns the given form_field with appended placeholder from its capizalited-each-word name."""
+    """Returns the given form_field with appended placeholder from its capitalized-each-word name."""
     placeholder = ' '.join(list(map(lambda x: x[0].upper() + x[1:], form_field.name.split('_'))))
     form_field.field.widget.attrs['placeholder'] = placeholder
     return form_field
