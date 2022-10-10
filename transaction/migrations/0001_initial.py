@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=24, verbose_name='Marketplace Name')),
                 ('short_name', models.CharField(blank=True, default=None, max_length=5, null=True, unique=True, verbose_name='Short Name')),
-                ('type', models.CharField(blank=True, default='', max_length=24, verbose_name='Short Name')),
+                ('type', models.CharField(blank=True, default='', max_length=24, verbose_name='Type')),
             ],
             options={
                 'unique_together': {('name', 'type')},
