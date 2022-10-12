@@ -308,7 +308,7 @@ class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
         times = int(form.data['times'])
         max_number_in_date = Transaction.objects.filter(date=date).aggregate(Max('number'))['number__max']
         transaction = Transaction.objects.get(date=date, number=number)
-        purchases = transaction.purchase_set.all()
+        purchases = list(transaction.purchase_set.all())
         with django_transaction.atomic():
             for i in range(1, times + 1):
                 transaction.id = None
