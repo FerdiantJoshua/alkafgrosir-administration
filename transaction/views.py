@@ -249,7 +249,7 @@ class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):
         next_page_url = _extract_path_param_value_as_str(self.request.get_full_path(), 'next')
         return success_url if not next_page_url else next_page_url
 
-    def delete(self, request, *args, **kwargs):
+    def form_valid(self, form):
         self.object = self.get_object()
         for purchase in self.object.purchase_set.all():
             purchase.delete()
