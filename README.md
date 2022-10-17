@@ -1,6 +1,6 @@
 # Alkafgrosir Administration
 
-![GitHub repo size](https://img.shields.io/github/repo-size/FerdiantJoshua/alkaf-administration) ![GitHub issues](https://img.shields.io/github/issues/FerdiantJoshua/alkaf-administration) ![GitHub](https://img.shields.io/github/license/FerdiantJoshua/alkaf-administration) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/FerdiantJoshua/alkaf-administration?include_prereleases)
+![GitHub repo size](https://img.shields.io/github/repo-size/FerdiantJoshua/alkafgrosir-administration) ![GitHub issues](https://img.shields.io/github/issues/FerdiantJoshua/alkafgrosir-administration) ![GitHub](https://img.shields.io/github/license/FerdiantJoshua/alkafgrosir-administration) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/FerdiantJoshua/alkafgrosir-administration?include_prereleases)
 
 An administration web to help automating Alkafgrosir's (an online seller) administration process.
 Built using [Django](https://github.com/django/django) 4.1.2.
