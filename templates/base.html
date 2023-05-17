@@ -44,6 +44,13 @@
         </ul>
         <ul class="navbar-nav">
           {% if user.is_authenticated %}
+          {% if debug == True %}
+          <li>
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-debugging">
+              Open Debugging Modal
+            </button>
+          </li>
+          {% endif %}
           <li><a class="nav-link" href="{% url 'management:main' %}"><i class="fas fa-tachometer-alt"></i> Management</a></li>
           <li><a class="nav-link" href="#"><i class="fas fa-user"></i> {{ user.first_name }} {{ user.last_name }} </a></li>
           <li><a class="nav-link" href="{% url 'account:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
@@ -73,6 +80,32 @@
     {% endif %}
     {% block content %}
     {% endblock %}
+    
+    <!-- Debugging Modal -->
+    <div class="modal fade" id="modal-debugging" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">SQL Queries</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>sql_queries:</p>
+            <ol>
+              {% for query in sql_queries %}
+              <li>{{ query }}</li>
+              {% endfor %}
+            </ol>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     </main>
 <!--    CDN-->
 <!--    <script src="https://code.jquery.com/jquery-3.4.1..min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>-->

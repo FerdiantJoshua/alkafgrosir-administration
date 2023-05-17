@@ -18,6 +18,7 @@ env = Env()
 env.read_env()
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 DEBUG = env.bool('DEBUG')
+INTERNAL_IPS = env.list('INTERNAL_IPS', [])
 DB_NAME = env('DB_NAME')
 DB_USER = env('DB_USER')
 DB_PASSWORD = env('DB_PASSWORD')
@@ -39,6 +40,8 @@ SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = DEBUG
+
+INTERNAL_IPS = INTERNAL_IPS
 
 ALLOWED_HOSTS = ALLOWED_HOSTS
 
