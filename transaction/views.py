@@ -240,8 +240,9 @@ class TransactionEditView(TransactionCreateView, generic.DetailView):
 
 
 class TransactionDeleteView(LoginRequiredMixin, generic.DeleteView):
+    # Deletion is confirmed by the modal on the edit page, so there is no GET confirmation page
+    http_method_names = ['post']
     model = Transaction
-    template_name = 'transaction/transaction_edit.html'
     success_url = reverse_lazy('transaction:list_transaction')
 
     def get_success_url(self):

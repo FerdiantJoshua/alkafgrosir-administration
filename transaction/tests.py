@@ -103,7 +103,17 @@ class TransactionAppTest(TestCase):
         url = reverse('transaction:delete_transaction', args=[self.first_transaction.pk])
 
         get_response = self.client.get(url)
-        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(get_response.status_code, 405)
+        self.assertTrue(Transaction.objects.filter(pk=self.first_transaction.pk).exists())
+
+    def test_post_delete_transaction(self):
+        pk = self.first_transaction.pk
+        url = reverse('transaction:delete_transaction', args=[pk])
+
+        post_response = self.client.post(url)
+        self.assertRedirects(post_response, reverse('transaction:list_transaction'))
+        self.assertFalse(Transaction.objects.filter(pk=pk).exists())
+        self.assertFalse(Purchase.objects.filter(transaction_id=pk).exists())
 
     def test_get_duplicate_transaction(self):
         url = reverse('transaction:duplicate_transaction')
