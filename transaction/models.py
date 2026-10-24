@@ -9,7 +9,7 @@ from django.urls import reverse, NoReverseMatch
 class City(models.Model):
     name = models.CharField(
         'City Name', max_length=48, unique=True,
-        validators=[RegexValidator('^[A-Z \.]*$', 'Only uppercase letters, space, and period are allowed.')]
+        validators=[RegexValidator(r'^[A-Z \.]*$', 'Only uppercase letters, space, and period are allowed.')]
     )
 
     def get_absolute_url(self):

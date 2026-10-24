@@ -262,10 +262,6 @@ class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
     template_name = 'transaction/transaction_duplicate.html'
     success_url = reverse_lazy('transaction:list_transaction')
     form_class = TransactionDuplicationForm
-    initial = {
-        'date': datetime.today(),
-        'number': Transaction.objects.filter(date=datetime.today()).aggregate(Max('number'))['number__max']
-    }
 
     DUP_MARKER_REGEX = re.compile(r'((?:\d)+)-th order')
 
@@ -280,6 +276,12 @@ class TransactionDuplicateView(LoginRequiredMixin, generic.FormView):
 
     def get_initial(self):
         initial = super().get_initial()
+        # Computed per request (not as a class attribute) so the defaults are never stale
+        today = datetime.today()
+        initial.update({
+            'date': today,
+            'number': Transaction.objects.filter(date=today).aggregate(Max('number'))['number__max']
+        })
         for key in self.request.GET:
             if key == 'date':
                 initial[key] = get_date_in_safe_format(self.request.GET[key]) if key == 'date' else initial.get(key)
