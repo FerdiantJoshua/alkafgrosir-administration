@@ -1,5 +1,7 @@
 asgiref==3.13.0
-Django==5.2.18
+# TEMPORARY: staging DB is MySQL 5.7.44, which Django 5.x rejects. Needs Python 3.12 (4.2 supports up to 3.12; fails on 3.14).
+# Revert to Django==5.2.18 after MySQL 8 upgrade.
+Django==4.2.30
 environs==15.2.0
 marshmallow==4.3.1
 mysqlclient==2.3.0
